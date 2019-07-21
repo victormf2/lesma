@@ -1,0 +1,32 @@
+{
+  "name": "lesma",
+  "version": "0.0.1",
+  "description": "Rest API controllers with TypeScript and express",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/victormf2/lesma.git"
+  },
+  "keywords": [
+    "typescript",
+    "rest",
+    "api"
+  ],
+  "author": "Victor Machado de França",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/victormf2/lesma/issues"
+  },
+  "homepage": "https://github.com/victormf2/lesma#readme",
+  "dependencies": {
+    "body-parser": "1.19.0",
+    "express": "4.17.1",
+    "reflect-metadata": "0.1.13"
+  },
+  "devDependencies": {
+    "@types/express": "4.17.0"
+  }
+}
