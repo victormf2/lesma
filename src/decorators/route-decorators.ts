@@ -1,23 +1,25 @@
 import "reflect-metadata";
 import { HttpMethod } from "../types";
-import { routingMetadata } from "../lesma-routing-metadata";
+import { MetadataProvider } from "../metadata";
+import { RouteMetadata } from "../metadata/route-metadata";
 
-function routeDecorator(method: HttpMethod, route: string) {
-    const decorator: MethodDecorator = function (controllerPrototype: Object, _propertyKey: string, descriptor: TypedPropertyDescriptor<any>) {
-        routingMetadata.addActionRoute(method, route, controllerPrototype, descriptor);
+function routeDecorator(method: HttpMethod, route: string, isRoot: boolean) {
+    const decorator: MethodDecorator = function (controllerPrototype: Object, methodName: string) {
+        const routeMetadata = new RouteMetadata(method, route, isRoot);
+        MetadataProvider.addActionRoute(routeMetadata, controllerPrototype, methodName);
     };
     return decorator;
 }
 
-export function Get(route: string = "") {
-    return routeDecorator("get", route);
+export function Get(path: string = "", isRoot: boolean = false) {
+    return routeDecorator("get", path, isRoot);
 }
-export function Post(route: string = "") {
-    return routeDecorator("post", route);
+export function Post(path: string = "", isRoot: boolean = false) {
+    return routeDecorator("post", path, isRoot);
 }
-export function Put(route: string = "") {
-    return routeDecorator("put", route);
+export function Put(path: string = "", isRoot: boolean = false) {
+    return routeDecorator("put", path, isRoot);
 }
-export function Delete(route: string = "") {
-    return routeDecorator("delete", route);
+export function Delete(path: string = "", isRoot: boolean = false) {
+    return routeDecorator("delete", path, isRoot);
 }

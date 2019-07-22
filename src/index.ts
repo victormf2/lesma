@@ -1,30 +1,17 @@
-import { Controller, Post } from "./decorators";
-import { RequestParameter } from "./decorators/validation-decorators";
-import { Lesma } from "./lesma";
+import * as exceptions from "./exceptions";
+import { Controller, Query } from "./decorators";
+export * from "./lesma"
+export {
+    exceptions
+}
 
-@RequestParameter()
-export class Values {
-    constructor(
-        public v: string
-    ) {
 
-    }
+@Controller("dae")
+export class ExampleController {
 
-    public FF(nn = "abc") {
-        console.log(nn);
+    async get(@Query("naosei") teste: number) {
+        
     }
 }
 
-@Controller()
-export class MyController {
-    @Post("ueba/:id")
-    public async get(id: number, values: Values) {
-        return (typeof id === "number");
-    }
-}
-
-const lesma = new Lesma({
-    port: 3000
-});
-lesma.start();
-
+new ExampleController();

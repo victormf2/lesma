@@ -43,11 +43,9 @@ class RoutingMetadataBuilder {
         for (let controllerName in this._controllerRoutes) {
             routingMetadata[controllerName] = {
                 controllerRoute: this._controllerRoutes[controllerName],
-                actionRoutes: this._actionRoutes.filter(actionRoute => {
-                    const ey =
-                    actionRoute.controllerPrototype == this._controllerRoutes[controllerName].controllerConstructor.prototype;
-                    return ey;
-                })
+                actionRoutes: this._actionRoutes.filter(actionRoute => 
+                    actionRoute.controllerPrototype == this._controllerRoutes[controllerName].controllerConstructor.prototype
+                )
             }
         }
         return routingMetadata;

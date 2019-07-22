@@ -1,7 +1,7 @@
 import express = require("express");
 import path = require("path");
 import { ActionRoute, ControllerRoute } from "./lesma-routing-metadata";
-import { BadRequestExecption, HttpException } from "./exceptions";
+import { BadRequestExecption, HttpException } from "./exceptions/http-exceptions";
 import { ValidationError } from "./validation-error";
 import { ParamInfo, getParamInfos } from "./reflection-utils";
 
