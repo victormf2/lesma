@@ -1,18 +1,15 @@
 import * as path from "path";
-import { ControllerMetadata } from "./controller-metadata";
-import { HttpMethod, Constructor, ControllerMethod } from "../types";
-import { ModelBindingMetadata, DefaultModelBinding, getBindingTarget } from "./model-binding";
+import { HttpMethod } from "../types";
 import { ActionMetadata } from "./action-metadata";
-import { ParameterInfo } from "./parameter-metadata";
+import { ControllerMetadata } from "./controller-metadata";
+import { DefaultModelBinding, getBindingTarget } from "./model-binding";
 
 export class RouteBinding {
     constructor(
         readonly httpMethod: HttpMethod,
         readonly path: string,
-        readonly controllerConstructor: Constructor,
-        readonly controllerMethod: ControllerMethod,
-        readonly modelBindings: Iterable<ModelBindingMetadata>,
-        readonly parameters: ArrayLike<ParameterInfo>,
+        readonly controller: ControllerMetadata,
+        readonly action: ActionMetadata,
     ) {
 
     }
@@ -60,17 +57,11 @@ export class RoutingMetadata {
     }
 
     private addActionRouteBinding(httpMethod: HttpMethod, path: string, controllerMetadata: ControllerMetadata, actionMetadata: ActionMetadata) {
-        const controllerConstructor = controllerMetadata.controllerConstructor;
-        const controllerMethod = actionMetadata.controllerMethod;
-        const modelBindings = actionMetadata.modelBindings;
-        const parameters = actionMetadata.parameters;
         const routeBinding = new RouteBinding(
             httpMethod,
             path,
-            controllerConstructor,
-            controllerMethod,
-            modelBindings,
-            parameters
+            controllerMetadata,
+            actionMetadata,
         );
         this._routeBindings.push(routeBinding);
     }

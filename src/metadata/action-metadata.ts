@@ -21,8 +21,8 @@ export class ActionMetadata {
         return this._routes;
     }
 
-    get modelBindings(): Iterable<ModelBindingMetadata> {
-        return this._modelBindings;
+    get modelBindings(): Array<ModelBindingMetadata> {
+        return this._modelBindings.slice();
     }
 
     get parameters(): ArrayLike<ParameterInfo> {

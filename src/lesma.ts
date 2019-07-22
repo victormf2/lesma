@@ -1,10 +1,12 @@
 import * as express from "express";
 import * as bodyParser from "body-parser";
-import { MetadataProvider } from "./metadata";
-import { RouteParser } from "./route-parser";
+import { MetadataProvider, IMetadataProvider } from "./metadata";
+import { RouteBinder, IRouteBinder } from "./route-binder";
 
 const defaultLesmaOptions: LesmaOptions = {
-    port: 3000
+    port: 3000,
+    metadataProvider: MetadataProvider,
+    routeBinder: RouteBinder,
 };
 
 function validateOptions(options: LesmaOptions) {
@@ -30,9 +32,9 @@ export class Lesma {
         this._app = express();
         this._app.use(bodyParser.json());
         this._options = Object.assign({}, defaultLesmaOptions, lesmaOptions);
-        const metadata = MetadataProvider.getMetadata();
+        const metadata = this._options.metadataProvider.getMetadata();
         for (let routeBinding of metadata.routeBindings) {
-            RouteParser.parseRoute(this._app, routeBinding);
+            this._options.routeBinder.bindRoute(this._app, routeBinding);
         }
     }
 
@@ -43,5 +45,7 @@ export class Lesma {
 }
 
 export interface LesmaOptions {
-    port?: number
+    port?: number,
+    metadataProvider?: IMetadataProvider,
+    routeBinder?: IRouteBinder,
 }
