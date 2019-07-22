@@ -1,3 +1,4 @@
+
 export abstract class ModelBindingMetadata {
     constructor(
         readonly target: ModelBindingTarget
@@ -13,6 +14,11 @@ export class ModelBindingTarget {
     }
 }
 
+export function getBindingTarget(controllerPrototype: Object, methodName: string, parameterIndex: number) {
+    const target = new ModelBindingTarget(parameterIndex);
+    return target;
+}
+
 export class QueryModelBinding extends ModelBindingMetadata {
     constructor(
         readonly name: string,
@@ -23,6 +29,15 @@ export class QueryModelBinding extends ModelBindingMetadata {
 }
 
 export class PathModelBinding extends ModelBindingMetadata {
+    constructor(
+        readonly name: string,
+        target: ModelBindingTarget
+    ) {
+        super(target);
+    }
+}
+
+export class HeaderModelBinding extends ModelBindingMetadata {
     constructor(
         readonly name: string,
         target: ModelBindingTarget

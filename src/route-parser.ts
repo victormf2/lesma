@@ -1,58 +1,90 @@
 import express = require("express");
-import path = require("path");
-import { ActionRoute, ControllerRoute } from "./lesma-routing-metadata";
 import { BadRequestExecption, HttpException } from "./exceptions/http-exceptions";
 import { ValidationError } from "./validation-error";
-import { ParamInfo, getParamInfos } from "./reflection-utils";
+import { RouteBinding } from "./metadata/routing-metadata";
+import { ModelBindingMetadata, QueryModelBinding, PathModelBinding, HeaderModelBinding, DefaultModelBinding } from "./metadata/model-binding";
+import { HttpContext } from "./request-handling/http-context";
+import { ParameterInfo } from "./metadata/parameter-metadata";
 
-export function parseRoute(app: express.Application, controller: ControllerRoute, action: ActionRoute) {
-    const paramInfos = getParamInfos(action.methodDescriptor.value);
-    const fullPath = path.posix.join("/", controller.path, action.path);
-    app[action.httpMethod](fullPath, async (req, res, next) => {
-        try {
-            const paramRawValues = getRawValues(req, paramInfos, action);
-            const paramTypes: any[] = Reflect.getMetadata("design:paramtypes", action.controllerPrototype, action.methodDescriptor.value.name);
-            const values = paramRawValues.map((rawValue, index) => parseAndValidate(paramInfos[index].name, rawValue, paramTypes[index]));
-            const validationErrors = values.filter(value => value instanceof ValidationError);
-            if (validationErrors.length) {
-                throw new BadRequestExecption(`Invalid request: ` + validationErrors.map(v => v.message).join(", "));
-            }
-            const controllerInstance = new controller.controllerConstructor();
-            const result = await action.methodDescriptor.value.apply(controllerInstance, values);
-            handleResult(result, res);
-        } catch (err) {
-            handleError(err, res);
-        }
-    });
+export interface IRouteParser {
+    parseRoute(app: express.Application, routeBinding: RouteBinding): void;
 }
 
-function getRawValues(req: express.Request, paramInfos: ParamInfo[], route: ActionRoute): (string|undefined)[] {
+class DefaultRouteParser implements IRouteParser {
+    parseRoute(app: express.Application, routeBinding: RouteBinding) {
 
-    const length = paramInfos.length;
-    let filledParams = new Array<boolean>(length).fill(false);
-    const rawValues = paramInfos.map<string|undefined>((info, index) => {
-        if (typeof req.params[info.name] !== 'undefined') {
-            filledParams[index] = true;
-            return req.params[info.name];
-        }
-        if (typeof req.query[info.name] !== 'undefined') {
-            filledParams[index] = true;
-            return req.query[info.name];
-        }
-        if (info.hasDefaultValue) {
-            filledParams[index] = true;
-        }
-    });
-
-    if (req.method !== "GET") {
-        rawValues[length - 1] = req.body;
-        filledParams[length - 1] = true;
+        app[routeBinding.httpMethod](routeBinding.path, async (req, res, next) => {
+            try {
+                const ctx = new HttpContext(req, res);
+                const paramRawValues = getRawValues(req, routeBinding);
+    
+                const parsedValues = new Array<any>(routeBinding.parameters.length);
+                const validationErrors: ValidationError[] = [];
+                for (let [modelBinding, rawValue] of paramRawValues) {
+                    const paramIndex = modelBinding.target.parameterIndex;
+                    const parameter = routeBinding.parameters[paramIndex];
+                    const parsedValue = parseAndValidate(rawValue, parameter, parsedValues[paramIndex], modelBinding.target.targetPath);
+                    if (parsedValue instanceof ValidationError) {
+                        validationErrors.push(parsedValue);
+                        continue;
+                    }
+                    parsedValues[paramIndex] = parsedValue;
+                }
+                if (validationErrors.length) {
+                    throw new BadRequestExecption(`Invalid request: ` + validationErrors.map(v => v.message).join(", "));
+                }
+                const controllerInstance = new routeBinding.controllerConstructor(ctx);
+                const result = await routeBinding.controllerMethod.apply(controllerInstance, parsedValues);
+                handleResult(result, res);
+            } catch (err) {
+                handleError(err, res);
+            }
+        });
     }
+}
+export const RouteParser = new DefaultRouteParser();
 
+function getRawValues(req: express.Request, routeBinding: RouteBinding): [ModelBindingMetadata, any][] {
+
+    const rawValues: [ModelBindingMetadata, any][] = [];
     const errorMessages: string[] = [];
-    for (let i = 0; i < length; i++) {
-        if (filledParams[i]) continue;
-        errorMessages.push(`Parameter ${paramInfos[i].name} is required`);
+    for (let modelBinding of routeBinding.modelBindings) {
+        const targetParameter = routeBinding.parameters[modelBinding.target.parameterIndex];
+        if (modelBinding instanceof QueryModelBinding) {
+            const queryValue = req.query[modelBinding.name];
+            if (typeof queryValue === "undefined" && !targetParameter.hasDefaultValue) {
+                errorMessages.push(`Query parameter ${modelBinding.name} is required`);
+                continue;
+            }
+            rawValues.push([modelBinding, queryValue]);
+        } else if (modelBinding instanceof PathModelBinding) {
+            const pathValue = req.params[modelBinding.name];
+            if (typeof pathValue === "undefined" && !targetParameter.hasDefaultValue) {
+                errorMessages.push(`Path value ${modelBinding.name} is required`);
+                continue;
+            }
+            rawValues.push([modelBinding, pathValue]);
+        } else if (modelBinding instanceof HeaderModelBinding) {
+            const headerValue = req.header(modelBinding.name);
+            if (typeof headerValue === "undefined" && !targetParameter.hasDefaultValue) {
+                errorMessages.push(`Header ${modelBinding.name} is required`);
+                continue;
+            }
+            rawValues.push([modelBinding, headerValue]);
+        } else if (modelBinding instanceof DefaultModelBinding) {
+            if (typeof req.params[targetParameter.name] !== "undefined") {
+                rawValues.push([modelBinding, req.params[targetParameter.name]]);
+            } else if (typeof req.query[targetParameter.name] !== "undefined") {
+                rawValues.push([modelBinding, req.query[targetParameter.name]]);
+            } else if (req.method !== "GET" && modelBinding.target.parameterIndex === routeBinding.parameters.length - 1) {
+                rawValues.push([modelBinding, req.body])
+            } else {
+                if (!targetParameter.hasDefaultValue) {
+                    errorMessages.push(`Could not set required parameter ${targetParameter.name}`);
+                    continue;
+                }
+            }
+        }
     }
 
     if (errorMessages.length) {
@@ -62,15 +94,24 @@ function getRawValues(req: express.Request, paramInfos: ParamInfo[], route: Acti
     return rawValues;
 }
 
-function parseAndValidate(paramName: string, rawValue: any, paramType: any): any {
-    if (paramType == String) {
+function parseAndValidate(rawValue: any, parameter: ParameterInfo, currentParsedValue: any, targetPath: string): any {
+
+    if (parameter.type == String) {
         return rawValue;
-    } else if (paramType == Number) {
+    } else if (parameter.type == Number) {
         const num = Number(rawValue);
         if (isNaN(num)) {
-            return new ValidationError(`The value for ${paramName} is not a valid number: ${rawValue}`);
+            return new ValidationError(`The value for ${parameter.name} is not a valid number: ${rawValue}`);
         }
         return num;
+    } else if (parameter.type == Date) {
+        const date = new Date(rawValue);
+        if (isNaN(date.getTime())) {
+            return new ValidationError(`The value for ${parameter.name} is not a valida date: ${rawValue}`);
+        }
+        return date;
+    } else if (parameter.type == Boolean) {
+        return rawValue && `${rawValue}`.toLowerCase() !== "false";
     } else {
         return rawValue;
     }

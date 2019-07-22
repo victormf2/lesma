@@ -1,5 +1,5 @@
 import { MetadataProvider } from "../metadata";
-import { QueryModelBinding, ModelBindingTarget, PathModelBinding } from "../metadata/model-binding";
+import { QueryModelBinding, PathModelBinding, HeaderModelBinding, getBindingTarget } from "../metadata/model-binding";
 
 export function RequestParameter() {
     const decorator: ClassDecorator = (target: any) => {
@@ -10,7 +10,7 @@ export function RequestParameter() {
 
 export function Query(name: string) {
     const decorator: ParameterDecorator = function(controllerPrototype: Object, methodName: string, parameterIndex: number) {
-        const target = new ModelBindingTarget(parameterIndex);
+        const target = getBindingTarget(controllerPrototype, methodName, parameterIndex);
         const modelBinding = new QueryModelBinding(name, target);
         MetadataProvider.addModelBinding(modelBinding, controllerPrototype, methodName);
     }
@@ -19,8 +19,17 @@ export function Query(name: string) {
 
 export function Path(name: string) {
     const decorator: ParameterDecorator = function(controllerPrototype: Object, methodName: string, parameterIndex: number) {
-        const target = new ModelBindingTarget(parameterIndex);
+        const target = getBindingTarget(controllerPrototype, methodName, parameterIndex);
         const modelBinding = new PathModelBinding(name, target);
+        MetadataProvider.addModelBinding(modelBinding, controllerPrototype, methodName);
+    }
+    return decorator;
+}
+
+export function Header(name: string) {
+    const decorator: ParameterDecorator = function(controllerPrototype: Object, methodName: string, parameterIndex: number) {
+        const target = getBindingTarget(controllerPrototype, methodName, parameterIndex);
+        const modelBinding = new HeaderModelBinding(name, target);
         MetadataProvider.addModelBinding(modelBinding, controllerPrototype, methodName);
     }
     return decorator;

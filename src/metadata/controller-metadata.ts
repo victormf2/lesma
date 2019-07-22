@@ -1,20 +1,15 @@
 import { Constructor } from "../types";
-import { IActionFilter } from "../naoseiainda/action-filter";
+import { IActionFilter } from "../request-handling/action-filter";
 import { ActionMetadata } from "./action-metadata";
 
 export class ControllerMetadata {
 
     constructor(
+        readonly controllerConstructor: Constructor
     ) {
     }
 
-    controllerConstructor: Constructor;
-    routes: string[];
+    routes: string[] = [];
     filters: IActionFilter[] = [];
     actions = new Map<string, ActionMetadata>();
-    get name(): string {
-        return this.controllerConstructor.name;
-    }
-
-    
 }

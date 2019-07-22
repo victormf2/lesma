@@ -1,7 +1,7 @@
 import * as express from "express";
 import * as bodyParser from "body-parser";
-import { routingMetadata } from "./lesma-routing-metadata";
-import { parseRoute } from "./route-parser";
+import { MetadataProvider } from "./metadata";
+import { RouteParser } from "./route-parser";
 
 const defaultLesmaOptions: LesmaOptions = {
     port: 3000
@@ -30,12 +30,9 @@ export class Lesma {
         this._app = express();
         this._app.use(bodyParser.json());
         this._options = Object.assign({}, defaultLesmaOptions, lesmaOptions);
-        const metadata = routingMetadata.getMetadata();
-        for (let c in metadata) {
-            const controllerRoute = metadata[c].controllerRoute;
-            for (let actionRoute of metadata[c].actionRoutes) {
-                parseRoute(this._app, controllerRoute, actionRoute);
-            }
+        const metadata = MetadataProvider.getMetadata();
+        for (let routeBinding of metadata.routeBindings) {
+            RouteParser.parseRoute(this._app, routeBinding);
         }
     }
 

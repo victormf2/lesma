@@ -1,12 +1,11 @@
 import "reflect-metadata";
-import { routingMetadata } from "../lesma-routing-metadata";
+import { MetadataProvider } from "../metadata";
+import { Constructor } from "../types";
 
 export function Controller(controllerRoute?: string) {
-    const decorator: ClassDecorator = (controllerConstructor: any) => {
-        routingMetadata.addControllerRoute(
-            controllerRoute || getControllerBaseRoute(controllerConstructor.name),
-            controllerConstructor
-        )
+    const decorator = (controllerConstructor: Constructor) => {
+        const routePath = controllerRoute || getControllerBaseRoute(controllerConstructor.name);
+        MetadataProvider.addBaseRoute(routePath, controllerConstructor.prototype);
     }
     return decorator;
 }

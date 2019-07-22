@@ -1,5 +1,6 @@
 import * as exceptions from "./exceptions";
-import { Controller, Query } from "./decorators";
+import { Controller, Query, Get } from "./decorators";
+import { Lesma } from "./lesma";
 export * from "./lesma"
 export {
     exceptions
@@ -9,9 +10,13 @@ export {
 @Controller("dae")
 export class ExampleController {
 
-    async get(@Query("naosei") teste: number) {
+    @Get()
+    async get(@Query("naosei") teste: number, nuebo: Date) {
         
     }
 }
 
 new ExampleController();
+
+let lesma = new Lesma();
+lesma.start();
