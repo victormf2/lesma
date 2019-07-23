@@ -5,6 +5,7 @@ import { ParameterInfo } from "./metadata/parameter-metadata";
 import { RouteBinding } from "./metadata/routing-metadata";
 import { HttpContext } from "./request-handling/http-context";
 import { ValidationError } from "./validation-error";
+import { CaracolProvider } from "./caracol/caracol-provider";
 
 export interface IRouteBinder {
     bindRoute(app: express.Application, routeBinding: RouteBinding): void;
@@ -15,6 +16,7 @@ class DefaultRouteBinder implements IRouteBinder {
         app[routeBinding.httpMethod](routeBinding.path, async (req, res, next) => {
             try {
                 const ctx = new HttpContext(req, res, routeBinding);
+                const caracol = CaracolProvider.getCaracol(ctx);
                 const paramRawValues = getRawValues(ctx);
                 const parsedValues = new Array<any>(routeBinding.action.parameters.length);
                 const validationErrors: ValidationError[] = [];
@@ -31,7 +33,7 @@ class DefaultRouteBinder implements IRouteBinder {
                 if (validationErrors.length) {
                     throw new BadRequestExecption(`Invalid request: ` + validationErrors.map(v => v.message).join(", "));
                 }
-                const controllerInstance = new routeBinding.controller.controllerConstructor(ctx);
+                const controllerInstance = caracol.get(routeBinding.controller.controllerConstructor);
                 const result = await routeBinding.action.controllerMethod.apply(controllerInstance, parsedValues);
                 handleResult(result, res);
             } catch (err) {

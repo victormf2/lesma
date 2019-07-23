@@ -7,7 +7,7 @@ export interface ICaracolProvider {
 
 class DefaultCaracolProvider implements ICaracolProvider {
     getCaracol(ctx: any) {
-        return new DefaultCaracol();
+        return new DefaultCaracol(ctx);
     }
 }
 

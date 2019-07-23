@@ -20,6 +20,7 @@ export class DefaultCaracol implements ICaracol {
 
     private contextScope: DependencyScope
     constructor(
+        private ctx: any,
     ) {
         this.contextScope = new DependencyScope();
     }
@@ -27,6 +28,9 @@ export class DefaultCaracol implements ICaracol {
     get<T>(key: string): T;
     get<T>(type: Constructor<T>): T;
     get<T>(key: string | Constructor<T>): T {
+        if (this.ctx.constructor === key) {
+            return this.ctx;
+        }
         const dependencies = getDependencies<T>();
         const metadata = dependencies.get(key);
         const dependencyScope = this.getDependencyScope(metadata.scope);

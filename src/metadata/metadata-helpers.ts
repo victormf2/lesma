@@ -80,9 +80,8 @@ export function addDependency<T>(key: string | Constructor<T>, p2?: T | Scope | 
         return addDependency(key, scope, factory);
     }
     if (typeof key === "function") {
-        const prototype = key.prototype;
         const scope = p2 as Scope || Scope.Transient;
-        return addDependency(prototype, new DependencyMetadata(scope, factory || getDefaultFactory(key)));
+        return addDependency(key, new DependencyMetadata(scope, factory || getDefaultFactory(key)));
     }
 }
 

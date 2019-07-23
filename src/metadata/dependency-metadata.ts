@@ -1,9 +1,9 @@
 import { DependencyFactory } from "../caracol";
 
 export enum Scope {
-    Singleton = "Singleton",
+    Transient = "Transient",
     Context = "Context",
-    Transient = "Transient"
+    Singleton = "Singleton",
 }
 
 export class DependencyMetadata<T = any> {

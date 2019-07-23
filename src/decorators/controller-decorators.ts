@@ -1,12 +1,14 @@
 import "reflect-metadata";
 import { Constructor } from "../types";
-import { setControllerRoutePath, addController } from "../metadata/metadata-helpers";
+import { setControllerRoutePath, addController, addDependency } from "../metadata/metadata-helpers";
+import { Scope } from "../metadata/dependency-metadata";
 
 export function Controller(controllerRoute?: string) {
     const decorator = (controllerConstructor: Constructor) => {
         const routePath = controllerRoute || getControllerBaseRoute(controllerConstructor.name);
         setControllerRoutePath(controllerConstructor, routePath);
         addController(controllerConstructor);
+        addDependency(controllerConstructor, Scope.Context);
     }
     return decorator;
 }
