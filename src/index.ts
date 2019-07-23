@@ -10,13 +10,17 @@ export {
 @Controller("dae")
 export class ExampleController {
 
+    constructor(
+        readonly teste: string
+    ) {}
+
     @Get()
     async get(@Query("naosei") teste: number, nuebo: Date) {
         
     }
 }
 
-new ExampleController();
+new ExampleController("kk");
 
 let lesma = new Lesma();
 lesma.start();

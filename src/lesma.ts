@@ -32,8 +32,8 @@ export class Lesma {
         this._app = express();
         this._app.use(bodyParser.json());
         this._options = Object.assign({}, defaultLesmaOptions, lesmaOptions);
-        const metadata = this._options.metadataProvider.getMetadata();
-        for (let routeBinding of metadata.routeBindings) {
+        const routingMetadata = this._options.metadataProvider.getRoutingMetadata();
+        for (let routeBinding of routingMetadata.routeBindings) {
             this._options.routeBinder.bindRoute(this._app, routeBinding);
         }
     }

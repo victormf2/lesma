@@ -5,35 +5,15 @@ import { ParameterInfo, getParameters } from "./parameter-metadata";
 
 export class ActionMetadata {
 
-    private _routes: RouteMetadata[] = [];
-    private _modelBindings: ModelBindingMetadata[] = [];
-    private _parameters: ParameterInfo[]
+    readonly parameters: ParameterInfo[]
     readonly controllerMethod: ControllerMethod;
     constructor(
         readonly controllerPrototype: Object,
-        controllerMethodName: string
+        controllerMethodName: string,
+        readonly routes: RouteMetadata[],
+        readonly modelBindings: ModelBindingMetadata[],
     ) {
         this.controllerMethod = (controllerPrototype as any)[controllerMethodName];
-        this._parameters = getParameters(controllerPrototype, controllerMethodName);
-    }
-
-    get routes(): Iterable<RouteMetadata> {
-        return this._routes;
-    }
-
-    get modelBindings(): Array<ModelBindingMetadata> {
-        return this._modelBindings.slice();
-    }
-
-    get parameters(): ArrayLike<ParameterInfo> {
-        return this._parameters;
-    }
-
-    addRoute(route: RouteMetadata) {
-        this._routes.push(route);
-    }
-
-    addModelBinding(modelBinding: ModelBindingMetadata) {
-        this._modelBindings.push(modelBinding);
+        this.parameters = getParameters(controllerPrototype, controllerMethodName);
     }
 }

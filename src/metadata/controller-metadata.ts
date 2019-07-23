@@ -5,11 +5,11 @@ import { ActionMetadata } from "./action-metadata";
 export class ControllerMetadata {
 
     constructor(
-        readonly controllerConstructor: Constructor
+        readonly controllerConstructor: Constructor,
+        readonly route: string,
+        readonly actions: ActionMetadata[],
     ) {
     }
 
-    routes: string[] = [];
     filters: IActionFilter[] = [];
-    actions = new Map<string, ActionMetadata>();
 }

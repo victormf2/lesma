@@ -17,11 +17,9 @@ export class RouteBinding {
 
 export class RoutingMetadata {
     private _routeBindings: RouteBinding[] = [];
-    constructor(controllers: Map<Object, ControllerMetadata>) {
+    constructor(controllers: ControllerMetadata[]) {
         controllers.forEach(controllerMetadata => {
-            controllerMetadata.routes.forEach(basePath => {
-                this.addControllerRouteBindings(basePath, controllerMetadata);
-            });
+            this.addControllerRouteBindings(controllerMetadata.route, controllerMetadata);
         }); 
     }
 
@@ -52,7 +50,7 @@ export class RoutingMetadata {
             if (!missingBindings[parameterIndex]) continue;
             const target = getBindingTarget(actionMetadata.controllerPrototype, actionMetadata.controllerMethod.name, parameterIndex)
             const modelBinding = new DefaultModelBinding(target);
-            actionMetadata.addModelBinding(modelBinding);
+            actionMetadata.modelBindings.push(modelBinding);
         }
     }
 

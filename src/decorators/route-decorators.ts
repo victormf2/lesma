@@ -1,12 +1,13 @@
 import "reflect-metadata";
-import { HttpMethod } from "../types";
-import { MetadataProvider } from "../metadata";
+import { addActionRoute, addControllerActionMethod } from "../metadata/metadata-helpers";
 import { RouteMetadata } from "../metadata/route-metadata";
+import { HttpMethod } from "../types";
 
-function routeDecorator(method: HttpMethod, route: string, isRoot: boolean) {
+function routeDecorator(method: HttpMethod, path: string, isRoot: boolean) {
     const decorator: MethodDecorator = function (controllerPrototype: Object, methodName: string) {
-        const routeMetadata = new RouteMetadata(method, route, isRoot);
-        MetadataProvider.addActionRoute(routeMetadata, controllerPrototype, methodName);
+        const routeMetadata = new RouteMetadata(method, path, isRoot);
+        addControllerActionMethod(controllerPrototype.constructor as any, methodName);
+        addActionRoute(controllerPrototype, methodName, routeMetadata);
     };
     return decorator;
 }

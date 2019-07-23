@@ -1,14 +1,17 @@
 import "reflect-metadata";
-import { MetadataProvider } from "../metadata";
 import { Constructor } from "../types";
+import { setControllerRoutePath, addController } from "../metadata/metadata-helpers";
 
 export function Controller(controllerRoute?: string) {
     const decorator = (controllerConstructor: Constructor) => {
         const routePath = controllerRoute || getControllerBaseRoute(controllerConstructor.name);
-        MetadataProvider.addBaseRoute(routePath, controllerConstructor.prototype);
+        setControllerRoutePath(controllerConstructor, routePath);
+        addController(controllerConstructor);
     }
     return decorator;
 }
+
+
 
 function getControllerBaseRoute(controllerClass: string): string {
     const suffixIndex = controllerClass.lastIndexOf("Controller");
