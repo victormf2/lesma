@@ -17,5 +17,8 @@
         "strictBindCallApply": true,
         "target": "esnext",
         "tsBuildInfoFile": "dist/.buildinfo"
-    }
+    },
+    "include": [
+        "./src/**/*.ts"
+    ]
 }

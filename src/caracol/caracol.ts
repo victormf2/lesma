@@ -1,4 +1,4 @@
-import { Constructor } from "../types";
+import { Constructor } from "../_types";
 
 export type DependencyFactory<T> = (caracol: ICaracol) => T;
 export interface ICaracol {
