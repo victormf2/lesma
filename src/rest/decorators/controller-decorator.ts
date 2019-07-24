@@ -1,14 +1,13 @@
 import "reflect-metadata";
-import { Constructor } from "../../_types";
 import { RestMetadata } from "../metadata";
-import { DependencyMetadata, Scope } from "../../caracol";
+import { CaracolMetadata, Scope } from "../../caracol";
 
 export function Controller(controllerRoute?: string) {
-    const decorator = (controllerConstructor: Constructor) => {
+    const decorator: ClassDecorator = (controllerConstructor: Function) => {
         const routePath = controllerRoute || getControllerBaseRoute(controllerConstructor.name);
         RestMetadata.setControllerRoutePath(controllerConstructor, routePath);
         RestMetadata.addController(controllerConstructor);
-        DependencyMetadata.addDependency(controllerConstructor, Scope.Context);
+        CaracolMetadata.addDependency(controllerConstructor, Scope.Context);
     }
     return decorator;
 }

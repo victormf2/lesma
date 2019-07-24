@@ -1,5 +1,5 @@
 export * from "./dependency-info";
-import * as DependencyMetadata from "./_helpers";
+import * as CaracolMetadata from "./_helpers";
 export {
-    DependencyMetadata
+    CaracolMetadata
 }

@@ -6,8 +6,8 @@ import { HttpMethod } from "../_types";
 function routeDecorator(method: HttpMethod, path: string, isRoot: boolean) {
     const decorator: MethodDecorator = function (controllerPrototype: Object, methodName: string) {
         const actionRouteInfo = new ActionRouteInfo(method, path, isRoot);
-        RestMetadata.addActionMethod(controllerPrototype.constructor as any, methodName);
-        RestMetadata.addActionRoute(controllerPrototype, methodName, actionRouteInfo);
+        RestMetadata.addActionMethod(controllerPrototype.constructor, methodName);
+        RestMetadata.addActionRoute(controllerPrototype.constructor, methodName, actionRouteInfo);
     };
     return decorator;
 }

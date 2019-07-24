@@ -7,10 +7,10 @@ const STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
 const BETWEEN_PARENTHESIS = /\(\s*(.*?)\s*\)(?:\s*\{)/s;
 const ARGUMENT_NAMES = /([a-zA-Z$_]\w*)\s*(=.*)?(,|$)/gm;
 
-export function getParameters(prototype: Object, methodName: string): ParameterInfo[] {
-    const parameterTypes = getParameterTypes(prototype, methodName);
+export function getParameters(constructor: Constructor, methodName: string): ParameterInfo[] {
+    const parameterTypes = getParameterTypes(constructor, methodName);
     const parameters: ParameterInfo[] = [];
-    const method: Method<Promise<any>> = (prototype as any)[methodName];
+    const method: Method<Promise<any>> = constructor.prototype[methodName];
     const fnStr = method.toString().replace(STRIP_COMMENTS, '');
     const paramsStr = fnStr.match(BETWEEN_PARENTHESIS)[1];
     let parameterIndex = 0;
@@ -24,8 +24,8 @@ export function getParameters(prototype: Object, methodName: string): ParameterI
     return parameters;
 }
 
-export function getParameterTypes(prototype: Object, methodName: string): Constructor[] {
-    const paramTypes = Reflect.getMetadata("design:paramtypes", prototype, methodName);
+export function getParameterTypes(constructor: Constructor, methodName: string): Constructor[] {
+    const paramTypes = Reflect.getMetadata("design:paramtypes", constructor.prototype, methodName);
     return paramTypes;
 }
 

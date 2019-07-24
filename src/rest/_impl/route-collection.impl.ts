@@ -36,7 +36,7 @@ export class RouteCollection {
 
         for (let parameterIndex = 0; parameterIndex < actionMetadata.parameters.length; parameterIndex++) {
             if (!missingBindings[parameterIndex]) continue;
-            const target = getBindingTarget(actionMetadata.controllerPrototype, actionMetadata.controllerMethod.name, parameterIndex)
+            const target = getBindingTarget(actionMetadata.controllerConstructor.prototype, actionMetadata.controllerMethod.name, parameterIndex)
             const modelBinding = new DefaultModelBinding(target);
             actionMetadata.modelBindings.push(modelBinding);
         }

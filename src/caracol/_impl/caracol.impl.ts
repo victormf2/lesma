@@ -1,7 +1,6 @@
 import { DependencyFactory, ICaracol } from "../caracol";
 import { Constructor } from "../../_types";
-import { DependencyMetadata, Scope } from "../metadata";
-
+import { CaracolMetadata, Scope } from "../metadata";
 
 class DependencyScope {
     
@@ -31,7 +30,7 @@ export class DefaultCaracol implements ICaracol {
         if (this.ctx.constructor === key) {
             return this.ctx;
         }
-        const dependencies = DependencyMetadata.getDependencies<T>();
+        const dependencies = CaracolMetadata.getDependencies<T>();
         const metadata = dependencies.get(key);
         const dependencyScope = this.getDependencyScope(metadata.scope);
         if (!dependencyScope) {

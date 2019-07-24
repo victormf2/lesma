@@ -14,9 +14,9 @@ export function getDependencies<T>(): Map<any, DependencyInfo<T>> {
 }
 export function addDependency<T>(key: string, instance: T): void;    
 export function addDependency<T>(key: string, scope: Scope, factory: DependencyFactory<T>): void;
-export function addDependency<T>(type: Constructor<T>, scope?: Scope, factory?: DependencyFactory<T>): void;
-export function addDependency<T>(key: string | Constructor<T>, DependencyInfo: DependencyInfo<T>): void;
-export function addDependency<T>(key: string | Constructor<T>, p2?: T | Scope | DependencyInfo<T>, factory?: DependencyFactory<T>) {
+export function addDependency<T>(type: Constructor<T> | Function, scope?: Scope, factory?: DependencyFactory<T>): void;
+export function addDependency<T>(key: string | Constructor<T> | Function, DependencyInfo: DependencyInfo<T>): void;
+export function addDependency<T>(key: string | Constructor<T> | Function, p2?: T | Scope | DependencyInfo<T>, factory?: DependencyFactory<T>) {
     if (p2 instanceof DependencyInfo) {
         const dependencies = getDependencies();
         dependencies.set(key, p2);
@@ -32,7 +32,7 @@ export function addDependency<T>(key: string | Constructor<T>, p2?: T | Scope | 
     }
     if (typeof key === "function") {
         const scope = p2 as Scope || Scope.Transient;
-        return addDependency(key, new DependencyInfo(scope, factory || getDefaultFactory(key)));
+        return addDependency(key, new DependencyInfo(scope, factory || getDefaultFactory(key as Constructor)));
     }
 }
 

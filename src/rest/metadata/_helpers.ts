@@ -3,17 +3,17 @@ import { ActionRouteInfo, ModelBindingInfo } from "../metadata";
 import { Metadata } from "../../metadata";
 
 const ControllersMetadataKey = "lesma:controllers";
-export function getControllerConstructors(): Constructor[] {
+export function getControllers(): Constructor[] {
     return Metadata.getArrrayMetadata(ControllersMetadataKey, Metadata.MetadataBase);
 }
-export function addController(controllerConstructor: Constructor) {
-    const controllers = getControllerConstructors();
-    if (!controllers.includes(controllerConstructor)) {
-        controllers.push(controllerConstructor);
+export function addController(controllerConstructor: Constructor | Function) {
+    const controllers = getControllers();
+    if (!controllers.includes(controllerConstructor as Constructor)) {
+        controllers.push(controllerConstructor as Constructor);
     }
 }
 const ControllerRouteMetadataKey = "lesma:controller-route";
-export function setControllerRoutePath(controllerConstructor: Constructor, routePath: string) {
+export function setControllerRoutePath(controllerConstructor: Constructor | Function, routePath: string) {
     Reflect.defineMetadata(ControllerRouteMetadataKey, routePath, controllerConstructor);
 }
 export function getControllerRoutePath(controllerConstructor: Constructor): string {
@@ -21,29 +21,29 @@ export function getControllerRoutePath(controllerConstructor: Constructor): stri
 }
 
 const ControllerActionMethodsMetadataKey = "lesma:controller-action-methods";
-export function getControllerActionMethods(controllerConstructor: Constructor): string[] {
+export function getActionMethods(controllerConstructor: Constructor): string[] {
     return Metadata.getArrrayMetadata(ControllerActionMethodsMetadataKey, controllerConstructor);
 }
-export function addActionMethod(controllerConstructor: Constructor, methodName: string) {
-    const controllerMethods = getControllerActionMethods(controllerConstructor);
+export function addActionMethod(controllerConstructor: Constructor | Function, methodName: string) {
+    const controllerMethods = getActionMethods(controllerConstructor as Constructor);
     if (!controllerMethods.includes(methodName)) {
         controllerMethods.push(methodName);
     }
 }
 const ActionRouteMetadataKey = "lesma:action-routes";
-export function getActionRoutes(controllerPrototype: Object, methodName: string): ActionRouteInfo[] {
-    return Metadata.getArrrayMetadata(ActionRouteMetadataKey, controllerPrototype, methodName);
+export function getActionRoutes(controllerConstructor: Constructor, methodName: string): ActionRouteInfo[] {
+    return Metadata.getArrrayMetadata(ActionRouteMetadataKey, controllerConstructor, methodName);
 }
-export function addActionRoute(controllerPrototype: Object, methodName: string, routeMetadata: ActionRouteInfo) {
-    const routeMetadatas = getActionRoutes(controllerPrototype, methodName);
-    routeMetadatas.push(routeMetadata);
+export function addActionRoute(controllerConstructor: Constructor | Function, methodName: string, route: ActionRouteInfo) {
+    const routes = getActionRoutes(controllerConstructor as Constructor, methodName);
+    routes.push(route);
 }
 
 const ModelBindingMetadataKey = "lesma:model-binding";
-export function getModelBindings(controllerPrototype: Object, methodName: string): ModelBindingInfo[] {
-    return Metadata.getArrrayMetadata(ModelBindingMetadataKey, controllerPrototype, methodName);
+export function getModelBindings(controllerConstructor: Constructor, methodName: string): ModelBindingInfo[] {
+    return Metadata.getArrrayMetadata(ModelBindingMetadataKey, controllerConstructor, methodName);
 }
-export function addModelBinding(controllerPrototype: Object, methodName: string, modelBinding: ModelBindingInfo) {
-    const modelBindings = getModelBindings(controllerPrototype, methodName);
+export function addModelBinding(controllerConstructor: Constructor | Function, methodName: string, modelBinding: ModelBindingInfo) {
+    const modelBindings = getModelBindings(controllerConstructor as Constructor, methodName);
     modelBindings.push(modelBinding);
 }
