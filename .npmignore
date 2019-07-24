@@ -1,4 +1,6 @@
-src/
-.vscode/
+src
+.vscode
 test-dist
 tests
+tsconfig*.json
+*.tgz

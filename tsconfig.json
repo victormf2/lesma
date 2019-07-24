@@ -5,7 +5,6 @@
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
         "forceConsistentCasingInFileNames": true,
-        "incremental": true,
         "module": "commonjs",
         "noImplicitAny": true,
         "noImplicitReturns": true,
@@ -13,10 +12,8 @@
         "noImplicitThis": true,
         "outDir": "dist",
         "rootDir": "src",
-        "sourceMap": true,
         "strictBindCallApply": true,
-        "target": "esnext",
-        "tsBuildInfoFile": "dist/.buildinfo"
+        "target": "esnext"
     },
     "include": [
         "./src/**/*.ts"

@@ -1,6 +1,8 @@
 {
     "extends": "./tsconfig.json",
     "compilerOptions": {
+        "incremental": true,
+        "sourceMap": true,
         "outDir": "test-dist",
         "rootDir": ".",
         "tsBuildInfoFile": "test-dist/.buildinfo"
