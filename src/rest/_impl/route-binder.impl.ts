@@ -19,7 +19,7 @@ export class DefaultRouteBinder implements IRouteBinder {
             try {
                 const ctx = new RestContext(req, res, route);
                 const caracol = this.caracolProvider.getCaracol(ctx);
-                const paramRawValues = getRawValues(ctx);
+                const paramRawValues = await getRawValues(ctx);
                 const parsedValues = new Array<any>(route.action.parameters.length);
                 const validationErrors: ValidationError[] = [];
                 for (let [modelBinding, rawValue] of paramRawValues) {
@@ -45,12 +45,12 @@ export class DefaultRouteBinder implements IRouteBinder {
     }
 }
 
-function getRawValues(ctx: RestContext): [ModelBindingInfo, any][] {
+async function getRawValues(ctx: RestContext): Promise<[ModelBindingInfo, any][]> {
 
     const action = ctx.route.action;
     const rawValues: [ModelBindingInfo, any][] = [];
     const errorMessages: string[] = [];
-    action.modelBindings.map(async modelBinding => {
+    const getRawValues = action.modelBindings.map(async modelBinding => {
         try {
             const targetParameter = action.parameters[modelBinding.target.parameterIndex];
             const rawValue = await modelBinding.getRawValue(ctx, targetParameter);
@@ -59,6 +59,7 @@ function getRawValues(ctx: RestContext): [ModelBindingInfo, any][] {
             errorMessages.push(err.message || err);
         }
     });
+    await Promise.all(getRawValues);
 
     if (errorMessages.length) {
         throw new BadRequestException("Invalid Request: " + errorMessages.join(", "));
