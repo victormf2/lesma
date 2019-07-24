@@ -4,7 +4,7 @@ import { Metadata } from "../../metadata";
 
 const ControllersMetadataKey = "lesma:controllers";
 export function getControllers(): Constructor[] {
-    return Metadata.getArrrayMetadata(ControllersMetadataKey, Metadata.MetadataBase);
+    return Metadata.getArrayMetadata(ControllersMetadataKey, Metadata.MetadataBase);
 }
 export function addController(controllerConstructor: Constructor | Function) {
     const controllers = getControllers();
@@ -22,7 +22,7 @@ export function getControllerRoutePath(controllerConstructor: Constructor): stri
 
 const ControllerActionMethodsMetadataKey = "lesma:controller-action-methods";
 export function getActionMethods(controllerConstructor: Constructor): string[] {
-    return Metadata.getArrrayMetadata(ControllerActionMethodsMetadataKey, controllerConstructor);
+    return Metadata.getArrayMetadata(ControllerActionMethodsMetadataKey, controllerConstructor);
 }
 export function addActionMethod(controllerConstructor: Constructor | Function, methodName: string) {
     const controllerMethods = getActionMethods(controllerConstructor as Constructor);
@@ -32,7 +32,7 @@ export function addActionMethod(controllerConstructor: Constructor | Function, m
 }
 const ActionRouteMetadataKey = "lesma:action-routes";
 export function getActionRoutes(controllerConstructor: Constructor, methodName: string): ActionRouteInfo[] {
-    return Metadata.getArrrayMetadata(ActionRouteMetadataKey, controllerConstructor, methodName);
+    return Metadata.getArrayMetadata(ActionRouteMetadataKey, controllerConstructor, methodName);
 }
 export function addActionRoute(controllerConstructor: Constructor | Function, methodName: string, route: ActionRouteInfo) {
     const routes = getActionRoutes(controllerConstructor as Constructor, methodName);
@@ -41,7 +41,7 @@ export function addActionRoute(controllerConstructor: Constructor | Function, me
 
 const ModelBindingMetadataKey = "lesma:model-binding";
 export function getModelBindings(controllerConstructor: Constructor, methodName: string): ModelBindingInfo[] {
-    return Metadata.getArrrayMetadata(ModelBindingMetadataKey, controllerConstructor, methodName);
+    return Metadata.getArrayMetadata(ModelBindingMetadataKey, controllerConstructor, methodName);
 }
 export function addModelBinding(controllerConstructor: Constructor | Function, methodName: string, modelBinding: ModelBindingInfo) {
     const modelBindings = getModelBindings(controllerConstructor as Constructor, methodName);

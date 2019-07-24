@@ -1,7 +1,7 @@
 {
   "name": "lesma",
-  "version": "0.0.1",
-  "description": "Rest API controllers with TypeScript and express",
+  "version": "0.2.0",
+  "description": "Rest API and Dependency Injection with TypeScript and express",
   "main": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -13,7 +13,10 @@
   "keywords": [
     "typescript",
     "rest",
-    "api"
+    "api",
+    "dependency",
+    "injection",
+    "validation"
   ],
   "author": "Victor Machado de França",
   "license": "ISC",

@@ -29,11 +29,23 @@ export function getParameterTypes(constructor: Constructor, methodName: string):
     return paramTypes;
 }
 
-export function getArrrayMetadata<T>(metadataKey: string, target: Object, propertyKey?: string): T[] {
-    let metadata: T[] = Reflect.getMetadata(metadataKey, target, propertyKey);
-    if (!metadata) {
-        metadata = [];
-        Reflect.defineMetadata(metadataKey, metadata, target, propertyKey);
+export function getArrayMetadata<T>(metadataKey: string, target: Object, propertyKey?: string, descriptor?: any): T[] {
+    if (typeof descriptor === "undefined") {
+        let metadata: T[] = Reflect.getMetadata(metadataKey, target, propertyKey);
+        if (!metadata) {
+            metadata = [];
+            Reflect.defineMetadata(metadataKey, metadata, target, propertyKey);
+        }
+        return metadata;
     }
-    return metadata;
+
+    let map: Map<any, T[]> = Reflect.getMetadata(metadataKey, target, propertyKey);
+    if (!map) {
+        map = new Map();
+        Reflect.defineMetadata(metadataKey, map, target, propertyKey);
+    }
+    if (!map.has(descriptor)) {
+        map.set(descriptor, []);
+    }
+    return map.get(descriptor);
 }
