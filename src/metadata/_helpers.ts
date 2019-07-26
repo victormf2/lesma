@@ -39,13 +39,18 @@ export function getArrayMetadata<T>(metadataKey: string, target: Object, propert
         return metadata;
     }
 
-    let map: Map<any, T[]> = Reflect.getMetadata(metadataKey, target, propertyKey);
-    if (!map) {
-        map = new Map();
-        Reflect.defineMetadata(metadataKey, map, target, propertyKey);
-    }
+    let map = getMapMetadata<any, T[]>(metadataKey, target, propertyKey);
     if (!map.has(descriptor)) {
         map.set(descriptor, []);
     }
     return map.get(descriptor);
+}
+
+export function getMapMetadata<K, V>(metadataKey: string, target: Object, propertyKey: string) {
+    let map: Map<K, V> = Reflect.getMetadata(metadataKey, target, propertyKey);
+    if (!map) {
+        map = new Map<K, V>();
+        Reflect.defineMetadata(metadataKey, map, target, propertyKey);
+    }
+    return map;
 }
