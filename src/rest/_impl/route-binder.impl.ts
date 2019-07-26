@@ -19,6 +19,29 @@ export class DefaultRouteBinder implements IRouteBinder {
             try {
                 const ctx = new RestContext(req, res, route);
                 const caracol = this.caracolProvider.getCaracol(ctx);
+
+                /*
+                TODO
+                1º: Iterar os parameter ModelBindings e montar o array do paramRawValues
+                2º: Para os parameterIndexes vazios:
+                 - Verificar se eles estão na query e adicionar ao paramRawValues
+                 - Se não: Verificar se o method não é GET e aplicar o body
+                3º: paramRawValues.map(parse) => (que agora batem com os parâmetros do método)
+                parse:
+                 - Verificar se tem um custom parser (esse é um TODO)
+                 - Se o tipo do parâmetro for simples, só faz o parse
+                 - Se o tipo do parâmetro for Array, ver se usou o @Array (ou @Type preciso analisar esse é um TODO)
+                 - Se o tipo do parâmetro for objeto complexo, chamar o parseComplex
+                parseComplex (recursivo):
+                    1º: Iterar os parameter ModelBindings do construtor e montar o array do paramRawValues
+                    2º: Para os parameterIndexes vazios:
+                    - Verificar se eles estão nas propriedades do body e adicionar ao paramRawValues
+                    *** Arumar um jeito de aplicar o validador Required nos parâmetros sem defaultValue
+                    3º: Iterar os property ModelBindings do construtor e montar o objeto propRawValues
+                    4º: paramRawValues.map(parse) => que agora batem com os parâmetros do construtor
+                    5º: propRawValues.map(parse) => que agora batem com as propriedades da classe
+                */
+
                 const paramRawValues = await getRawValues(ctx);
                 const parsedValues = new Array<any>(route.action.parameters.length);
                 const validationErrors: ValidationError[] = [];
