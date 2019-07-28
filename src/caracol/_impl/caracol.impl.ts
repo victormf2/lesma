@@ -27,7 +27,7 @@ export class DefaultCaracol<C> implements Caracol<C> {
     get<T>(key: string): T;
     get<T>(type: Constructor<T>): T;
     get<T>(key: string | Constructor<T>): T {
-        const dependencies = CaracolMetadata.getDependencies<T>();
+        const dependencies = CaracolMetadata.getDependencies<C, T>();
         const metadata = dependencies.get(key);
         const dependencyScope = this.getDependencyScope(metadata.scope);
         if (!dependencyScope) {

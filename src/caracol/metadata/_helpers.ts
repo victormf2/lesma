@@ -4,8 +4,8 @@ import { Metadata } from "../../metadata";
 import { Constructor } from "../../_types";
 
 const schlebs = "lesma:dependencies";
-export function getDependencies<T>(): Map<any, DependencyInfo<T>> {
-    let metadata: Map<any, DependencyInfo> = Reflect.getMetadata(schlebs, Metadata.MetadataBase);
+export function getDependencies<C, T>(): Map<any, DependencyInfo<C, T>> {
+    let metadata: Map<any, DependencyInfo<C, T>> = Reflect.getMetadata(schlebs, Metadata.MetadataBase);
     if (!metadata) {
         metadata = new Map();
         Reflect.defineMetadata(schlebs, metadata, Metadata.MetadataBase);
@@ -13,9 +13,9 @@ export function getDependencies<T>(): Map<any, DependencyInfo<T>> {
     return metadata;
 }
 export function addDependency<T>(key: string, instance: T): void;    
+export function addDependency<C, T>(key: string | Constructor<T> | Function, DependencyInfo: DependencyInfo<C, T>): void;
 export function addDependency<C, T>(key: string, scope: Scope, factory: DependencyFactory<C, T>): void;
 export function addDependency<C, T>(type: Constructor<T> | Function, scope?: Scope, factory?: DependencyFactory<C, T>): void;
-export function addDependency<T>(key: string | Constructor<T> | Function, DependencyInfo: DependencyInfo<T>): void;
 export function addDependency<C, T>(key: string | Constructor<T> | Function, p2?: T | Scope | DependencyInfo<T>, factory?: DependencyFactory<C, T>) {
     if (p2 instanceof DependencyInfo) {
         const dependencies = getDependencies();
@@ -32,7 +32,7 @@ export function addDependency<C, T>(key: string | Constructor<T> | Function, p2?
     }
     if (typeof key === "function") {
         const scope = p2 as Scope || Scope.Transient;
-        return addDependency(key, new DependencyInfo(scope, factory || getDefaultFactory(key as Constructor)));
+        return addDependency<C, T>(key, new DependencyInfo<C, T>(scope, factory || getDefaultFactory<C, T>(key as Constructor)));
     }
 }
 

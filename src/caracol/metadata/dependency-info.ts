@@ -6,10 +6,10 @@ export enum Scope {
     Singleton = "Singleton",
 }
 
-export class DependencyInfo<T = any> {
+export class DependencyInfo<C, T = any> {
     constructor(
         readonly scope: Scope,
-        readonly factory: DependencyFactory<T>
+        readonly factory: DependencyFactory<C, T>
     ) {
 
     }
