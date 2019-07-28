@@ -1,5 +1,5 @@
 import { DependencyInfo, Scope } from "./dependency-info";
-import { DependencyFactory, ICaracol } from "../caracol";
+import { DependencyFactory, Caracol } from "../caracol";
 import { Metadata } from "../../metadata";
 import { Constructor } from "../../_types";
 
@@ -13,10 +13,10 @@ export function getDependencies<T>(): Map<any, DependencyInfo<T>> {
     return metadata;
 }
 export function addDependency<T>(key: string, instance: T): void;    
-export function addDependency<T>(key: string, scope: Scope, factory: DependencyFactory<T>): void;
-export function addDependency<T>(type: Constructor<T> | Function, scope?: Scope, factory?: DependencyFactory<T>): void;
+export function addDependency<C, T>(key: string, scope: Scope, factory: DependencyFactory<C, T>): void;
+export function addDependency<C, T>(type: Constructor<T> | Function, scope?: Scope, factory?: DependencyFactory<C, T>): void;
 export function addDependency<T>(key: string | Constructor<T> | Function, DependencyInfo: DependencyInfo<T>): void;
-export function addDependency<T>(key: string | Constructor<T> | Function, p2?: T | Scope | DependencyInfo<T>, factory?: DependencyFactory<T>) {
+export function addDependency<C, T>(key: string | Constructor<T> | Function, p2?: T | Scope | DependencyInfo<T>, factory?: DependencyFactory<C, T>) {
     if (p2 instanceof DependencyInfo) {
         const dependencies = getDependencies();
         dependencies.set(key, p2);
@@ -36,12 +36,12 @@ export function addDependency<T>(key: string | Constructor<T> | Function, p2?: T
     }
 }
 
-function getDefaultFactory<T>(constructor: Constructor<T>): DependencyFactory<T> {
+function getDefaultFactory<C, T>(constructor: Constructor<T>): DependencyFactory<C, T> {
     const constructorTypes: Constructor[] = Reflect.getMetadata("design:paramtypes", constructor)
     if (!constructorTypes) {
         throw new Error(`Default dependency injection require a decorator on class ${constructor.name}. You may use @Injectable to set scope.`);
     }
-    return (caracol: ICaracol) => {
+    return (caracol: Caracol<C>) => {
         const parameters = constructorTypes.map(type => caracol.get(type));
         return new constructor(...parameters);
     }

@@ -1,11 +1,11 @@
-import { DependencyFactory, ICaracol } from "../caracol";
+import { DependencyFactory, Caracol } from "../caracol";
 import { Constructor } from "../../_types";
 import { CaracolMetadata, Scope } from "../metadata";
 
 class DependencyScope {
     
     private instances = new Map();
-    get<T>(key: any, factory: DependencyFactory<T>, caracol: ICaracol) {
+    get<C, T>(key: any, factory: DependencyFactory<C, T>, caracol: Caracol<C>) {
         if (!this.instances.has(key)) {
             this.instances.set(key, factory(caracol))
         }
@@ -15,11 +15,11 @@ class DependencyScope {
 
 const SingletonScope = new DependencyScope();
 
-export class DefaultCaracol implements ICaracol {
+export class DefaultCaracol<C> implements Caracol<C> {
 
     private contextScope: DependencyScope
     constructor(
-        private ctx: any,
+        readonly ctx: C,
     ) {
         this.contextScope = new DependencyScope();
     }
@@ -27,9 +27,6 @@ export class DefaultCaracol implements ICaracol {
     get<T>(key: string): T;
     get<T>(type: Constructor<T>): T;
     get<T>(key: string | Constructor<T>): T {
-        if (this.ctx.constructor === key) {
-            return this.ctx;
-        }
         const dependencies = CaracolMetadata.getDependencies<T>();
         const metadata = dependencies.get(key);
         const dependencyScope = this.getDependencyScope(metadata.scope);

@@ -1,5 +1,5 @@
-import { ICaracol } from "./caracol";
+import { Caracol } from "./caracol";
 
 export interface ICaracolProvider {
-    getCaracol(ctx: any): ICaracol
+    getCaracol<C>(ctx: C): Caracol<C>
 }

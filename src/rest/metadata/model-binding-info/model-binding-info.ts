@@ -1,5 +1,6 @@
 import { ParameterInfo } from "../../../metadata/parameter-info";
 import { RestContext } from "../../rest-context";
+import { Constructor } from "../../../_types";
 
 export abstract class ModelBindingInfo {
     constructor(
@@ -9,16 +10,22 @@ export abstract class ModelBindingInfo {
     abstract getRawValue(ctx: RestContext, targetParameter: ParameterInfo): Promise<any>
 }
 
-export class ModelBindingTarget {
+export abstract class ModelBindingTarget {
+}
+
+export class ParameterModelBindingTarget extends ModelBindingTarget {
     constructor(
-        readonly parameterIndex: number,
-        readonly targetPath?: string // TODO parse path to build complex objects from model binding
+        readonly parameterIndex: number
     ) {
-        
+        super();
     }
 }
 
-export function getBindingTarget(controllerPrototype: Object, methodName: string, parameterIndex: number) {
-    const target = new ModelBindingTarget(parameterIndex);
-    return target;
+export class PropertyModelBindingTarget extends ModelBindingTarget {
+    constructor(
+        readonly constuctor: Constructor,
+        readonly propertyName: string,
+    ) {
+        super();
+    }
 }

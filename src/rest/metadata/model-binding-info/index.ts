@@ -1,5 +1,4 @@
 export * from "./model-binding-info"
-export * from "./default"
 export * from "./header"
 export * from "./path"
 export * from "./query"

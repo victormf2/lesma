@@ -40,10 +40,10 @@ export function addActionRoute(controllerConstructor: Constructor | Function, me
 }
 
 const ModelBindingMetadataKey = "lesma:model-binding";
-export function getModelBindings(controllerConstructor: Constructor, methodName: string): ModelBindingInfo[] {
-    return Metadata.getArrayMetadata(ModelBindingMetadataKey, controllerConstructor, methodName);
+export function getModelBindings(constructor: Constructor, propertyKey?: string): ModelBindingInfo[] {
+    return Metadata.getArrayMetadata(ModelBindingMetadataKey, constructor, propertyKey);
 }
-export function addModelBinding(controllerConstructor: Constructor | Function, methodName: string, modelBinding: ModelBindingInfo) {
-    const modelBindings = getModelBindings(controllerConstructor as Constructor, methodName);
+export function addModelBinding(modelBinding: ModelBindingInfo, constructor: Constructor | Function, propertyKey?: string) {
+    const modelBindings = getModelBindings(constructor as Constructor, propertyKey);
     modelBindings.push(modelBinding);
 }

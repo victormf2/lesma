@@ -1,12 +1,12 @@
 
-import { ParameterInfo } from "../../metadata/parameter-info";
-import { RestContext } from "../rest-context";
-import { ValidationError } from "../../validation-error";
 import { ICaracolProvider } from "../../caracol/caracol-provider";
-import express = require("express");
-import { ModelBindingInfo } from "../metadata";
+import { TypeInfo } from "../../metadata/type-info";
+import { HttpException } from "../exceptions";
+import { getParamRawValues } from "../model-binding";
+import { ParserProvider } from "../parsers";
+import { RestContext } from "../rest-context";
 import { IRouteBinder, Route } from "../routing";
-import { BadRequestException, HttpException } from "../exceptions";
+import express = require("express");
 
 export class DefaultRouteBinder implements IRouteBinder {
 
@@ -22,8 +22,8 @@ export class DefaultRouteBinder implements IRouteBinder {
 
                 /*
                 TODO
-                1º: Iterar os parameter ModelBindings e montar o array do paramRawValues
-                2º: Para os parameterIndexes vazios:
+                * 1º: Iterar os parameter ModelBindings e montar o array do paramRawValues
+                * 2º: Para os parameterIndexes vazios:
                  - Verificar se eles estão na query e adicionar ao paramRawValues
                  - Se não: Verificar se o method não é GET e aplicar o body
                 3º: paramRawValues.map(parse) => (que agora batem com os parâmetros do método)
@@ -42,22 +42,11 @@ export class DefaultRouteBinder implements IRouteBinder {
                     5º: propRawValues.map(parse) => que agora batem com as propriedades da classe
                 */
 
-                const paramRawValues = await getRawValues(ctx);
-                const parsedValues = new Array<any>(route.action.parameters.length);
-                const validationErrors: ValidationError[] = [];
-                for (let [modelBinding, rawValue] of paramRawValues) {
-                    const paramIndex = modelBinding.target.parameterIndex;
-                    const parameter = route.action.parameters[paramIndex];
-                    const parsedValue = parseAndValidate(rawValue, parameter, parsedValues[paramIndex], modelBinding.target.targetPath);
-                    if (parsedValue instanceof ValidationError) {
-                        validationErrors.push(parsedValue);
-                        continue;
-                    }
-                    parsedValues[paramIndex] = parsedValue;
-                }
-                if (validationErrors.length) {
-                    throw new BadRequestException(`Invalid request: ` + validationErrors.map(v => v.message).join(", "));
-                }
+                const paramRawValues = await getParamRawValues(ctx, ctx.route.action.parameters, ctx.route.action.modelBindings);
+                fillEmptyRawValues(route, paramRawValues, ctx);
+                const getParsedValues = route.action.parameters.map((parameter, index) => parse(paramRawValues[index], parameter.type))
+                const parsedValues = await Promise.all(getParsedValues);
+                
                 const controllerInstance = caracol.get(route.controller.controllerConstructor);
                 const result = await route.action.controllerMethod.apply(controllerInstance, parsedValues);
                 handleResult(result, res);
@@ -68,49 +57,25 @@ export class DefaultRouteBinder implements IRouteBinder {
     }
 }
 
-async function getRawValues(ctx: RestContext): Promise<[ModelBindingInfo, any][]> {
-
-    const action = ctx.route.action;
-    const rawValues: [ModelBindingInfo, any][] = [];
-    const errorMessages: string[] = [];
-    const getRawValues = action.modelBindings.map(async modelBinding => {
-        try {
-            const targetParameter = action.parameters[modelBinding.target.parameterIndex];
-            const rawValue = await modelBinding.getRawValue(ctx, targetParameter);
-            rawValues.push([modelBinding, rawValue]);
-        } catch (err) {
-            errorMessages.push(err.message || err);
-        }
-    });
-    await Promise.all(getRawValues);
-
-    if (errorMessages.length) {
-        throw new BadRequestException("Invalid Request: " + errorMessages.join(", "));
-    }
-
-    return rawValues;
+async function parse(rawValue: any, typeInfo: TypeInfo): Promise<any> {
+    const parser = ParserProvider.get(typeInfo);
+    return parser.parse(rawValue, typeInfo);
 }
 
-function parseAndValidate(rawValue: any, parameter: ParameterInfo, currentParsedValue: any, targetPath: string): any {
-
-    if (parameter.type == String) {
-        return rawValue;
-    } else if (parameter.type == Number) {
-        const num = Number(rawValue);
-        if (isNaN(num)) {
-            return new ValidationError(`The value for ${parameter.name} is not a valid number: ${rawValue}`);
+function fillEmptyRawValues(route: Route, paramRawValues: any[], ctx: RestContext) {
+    route.action.parameters.forEach((parameter, index) => {
+        if (typeof paramRawValues[index] !== "undefined") {
+            return;
         }
-        return num;
-    } else if (parameter.type == Date) {
-        const date = new Date(rawValue);
-        if (isNaN(date.getTime())) {
-            return new ValidationError(`The value for ${parameter.name} is not a valida date: ${rawValue}`);
+        const req = ctx.req;
+        if (typeof req.query[parameter.name] !== "undefined") {
+            paramRawValues[index] = req.query[parameter.name];
         }
-        return date;
-    } else if (parameter.type == Boolean) {
-        return rawValue && `${rawValue}`.toLowerCase() !== "false";
-    } else {
-        return rawValue;
+    });
+    if (typeof paramRawValues[paramRawValues.length - 1] === "undefined") {
+        if (ctx.req.method !== "GET") {
+            paramRawValues[paramRawValues.length - 1] = ctx.req.body;
+        }
     }
 }
 
