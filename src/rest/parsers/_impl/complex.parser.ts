@@ -25,12 +25,9 @@ export class DefaultComplexParser implements IParser<any> {
         const constructor = typeInfo.type
         const parameters = Metadata.getParameters(constructor)
         const modelBindings = RestMetadata.getModelBindings(constructor)
-        const rawValues = await getParamRawValues(this.caracol.ctx, parameters, modelBindings)
+        const rawValues = await getParamRawValues(this.caracol.ctx, parameters, modelBindings, getDefaultValue(body))
         const getConstructorValues = parameters.map(async parameter => {
             let rawValue = rawValues[parameter.index]
-            if (typeof rawValue === "undefined") {
-                rawValue = body[parameter.name]
-            }
             if (rawValue == null) {
                 return rawValue
             }
@@ -51,5 +48,11 @@ export class DefaultComplexParser implements IParser<any> {
     private getParser(constructor: Constructor, parameter: ParameterInfo): IParser<any> {
         const parserKey = ParserMetadata.getParserKey(constructor, parameter.index)
         return parserKey ? this.caracol.get(parserKey) : this.provider.get<any>(parameter.type)
+    }
+}
+
+function getDefaultValue(body: any) {
+    return function(parameter: ParameterInfo) {
+        return body[parameter.name]
     }
 }

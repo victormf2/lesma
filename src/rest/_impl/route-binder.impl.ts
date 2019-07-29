@@ -7,6 +7,7 @@ import { RestContext } from "../rest-context";
 import { IRouteBinder, Route } from "../routing";
 import express = require("express");
 import { ParserProvider } from "../parsers/parser-provider";
+import { ParameterInfo } from "../../metadata";
 
 export class DefaultRouteBinder implements IRouteBinder {
 
@@ -21,8 +22,8 @@ export class DefaultRouteBinder implements IRouteBinder {
                 const caracol = this.caracolProvider.getCaracol(ctx);
                 const parserProvider = caracol.get(ParserProvider);
 
-                const paramRawValues = await getParamRawValues(ctx, ctx.route.action.parameters, ctx.route.action.modelBindings);
-                fillEmptyRawValues(route, paramRawValues, ctx);
+                const { parameters, modelBindings } = ctx.route.action;
+                const paramRawValues = await getParamRawValues(ctx, parameters, modelBindings, fillEmptyRawValues);
                 const getParsedValues = route.action.parameters.map((parameter, index) => parse(parserProvider, paramRawValues[index], parameter.type))
                 const parsedValues = await Promise.all(getParsedValues);
                 
@@ -41,20 +42,14 @@ async function parse(provider: ParserProvider, rawValue: any, typeInfo: TypeInfo
     return parser.parse(rawValue, typeInfo);
 }
 
-function fillEmptyRawValues(route: Route, paramRawValues: any[], ctx: RestContext) {
-    route.action.parameters.forEach((parameter, index) => {
-        if (typeof paramRawValues[index] !== "undefined") {
-            return;
-        }
-        const req = ctx.req;
-        if (typeof req.query[parameter.name] !== "undefined") {
-            paramRawValues[index] = req.query[parameter.name];
-        }
-    });
-    if (typeof paramRawValues[paramRawValues.length - 1] === "undefined") {
-        if (ctx.req.method !== "GET") {
-            paramRawValues[paramRawValues.length - 1] = ctx.req.body;
-        }
+function fillEmptyRawValues(parameter: ParameterInfo, ctx: RestContext) {
+    const req = ctx.req
+    if (typeof req.query[parameter.name] !== "undefined") {
+        return req.query[parameter.name]
+    }
+    const parameters = ctx.route.action.parameters;
+    if (parameter.index === parameters.length - 1 && ctx.req.method !== "GET") {
+        return ctx.req.body
     }
 }
 

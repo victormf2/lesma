@@ -6,7 +6,11 @@ function ModelBindingDecorator(factory: ModelBindingFactory): ParameterDecorator
     const decorator: ParameterDecorator | PropertyDecorator = function(target: Object, propertyKey: string, parameterIndex?: number) {
         const bindingTarget = getModelBindingTarget(target, propertyKey, parameterIndex);
         const modelBinding = factory(bindingTarget);
-        RestMetadata.addModelBinding(modelBinding, target.constructor, propertyKey);
+        if (!propertyKey) {
+            RestMetadata.addModelBinding(modelBinding, target as any);
+        } else {
+            RestMetadata.addModelBinding(modelBinding, target.constructor, propertyKey);
+        }
     }
     return decorator;
 }

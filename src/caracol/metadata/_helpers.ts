@@ -3,12 +3,21 @@ import { DependencyFactory, Caracol } from "../caracol";
 import { Metadata } from "../../metadata";
 import { Constructor } from "../../_types";
 
-const schlebs = "lesma:dependencies";
+const InjectableMetadataKey = "lesma:injectable";
+export function setInjection(scope: Scope, constructor: Constructor) {
+    Reflect.defineMetadata(InjectableMetadataKey, scope, constructor);
+    addDependency(constructor, scope);
+}
+export function isInjectable(constructor: Constructor): boolean {
+    return !!Reflect.getMetadata(InjectableMetadataKey, constructor);
+}
+
+const DependencyMetadataKey = "lesma:dependencies";
 export function getDependencies<C, T>(): Map<any, DependencyInfo<C, T>> {
-    let metadata: Map<any, DependencyInfo<C, T>> = Reflect.getMetadata(schlebs, Metadata.MetadataBase);
+    let metadata: Map<any, DependencyInfo<C, T>> = Reflect.getMetadata(DependencyMetadataKey, Metadata.MetadataBase);
     if (!metadata) {
         metadata = new Map();
-        Reflect.defineMetadata(schlebs, metadata, Metadata.MetadataBase);
+        Reflect.defineMetadata(DependencyMetadataKey, metadata, Metadata.MetadataBase);
     }
     return metadata;
 }
@@ -37,9 +46,12 @@ export function addDependency<C, T>(key: string | Constructor<T> | Function, p2?
 }
 
 function getDefaultFactory<C, T>(constructor: Constructor<T>): DependencyFactory<C, T> {
-    const constructorTypes: Constructor[] = Reflect.getMetadata("design:paramtypes", constructor)
+    let constructorTypes: Constructor[] = Reflect.getMetadata("design:paramtypes", constructor)
     if (!constructorTypes) {
-        throw new Error(`Default dependency injection require a decorator on class ${constructor.name}. You may use @Injectable to set scope.`);
+        if (!isInjectable(constructor)) {
+            throw new Error(`Default dependency injection require a decorator on class ${constructor.name}. You may use @Injectable to set scope.`);
+        }
+        constructorTypes = [];
     }
     return (caracol: Caracol<C>) => {
         const parameters = constructorTypes.map(type => caracol.get(type));

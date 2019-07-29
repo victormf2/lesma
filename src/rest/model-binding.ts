@@ -3,8 +3,9 @@ import { ParameterInfo } from "../metadata"
 import { BadRequestException } from "./exceptions"
 import { ModelBindingInfo } from "./metadata"
 
-
-export async function getParamRawValues(ctx: RestContext, parameters: ParameterInfo[], modelBindings: ModelBindingInfo[]): Promise<any[]> {
+type DefaultValueFn = (parameter: ParameterInfo, ctx: RestContext) => any
+const defaultValue: DefaultValueFn = () => undefined;
+export async function getParamRawValues(ctx: RestContext, parameters: ParameterInfo[], modelBindings: ModelBindingInfo[], defaultValueFn: DefaultValueFn = defaultValue): Promise<any[]> {
 
     const errorMessages: string[] = []
     const mappedModelBindings = new Array(parameters.length)
@@ -16,16 +17,16 @@ export async function getParamRawValues(ctx: RestContext, parameters: ParameterI
 
     const getRawValues = parameters.map(async (parameter, index): Promise<any> => {
         try {
-            const modelBinding = mappedModelBindings[index];
+            const modelBinding = mappedModelBindings[index]
             if (!modelBinding) {
-                return undefined;
+                return defaultValueFn(parameter, ctx);
             }
-            const rawValue = await modelBinding.getRawValue(ctx, parameter);
-            return rawValue;
+            const rawValue = await modelBinding.getRawValue(ctx, parameter)
+            return rawValue
         } catch (err) {
-            errorMessages.push(err.message || err);
+            errorMessages.push(err.message || err)
         }
-        return undefined;
+        return undefined
     });
     const rawValues: any[] = await Promise.all(getRawValues);
 

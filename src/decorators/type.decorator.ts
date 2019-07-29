@@ -1,5 +1,6 @@
-import { Constructor } from "../_types";
-import { TypeInfo } from "../metadata/type-info";
+import { Constructor } from "../_types"
+import { TypeInfo } from "../metadata/type-info"
+import { Metadata } from "../metadata"
 
 /**
  * Use this decorator to apply type information metadata to method parameters and class properties.
@@ -18,25 +19,25 @@ import { TypeInfo } from "../metadata/type-info";
  * @param type The main type.
  * @param parameters The generic type parameters if any. You may also provide nested generic type parameters 
  */
-export function Type(type: Constructor, parameters?: any): ParameterDecorator | PropertyDecorator {
-    const decorator: ParameterDecorator | PropertyDecorator = function(prototype, propertyKey, parameterIndex) {
-
-    };
-    return decorator;
+export function Type(type: Constructor, parameters?: any[]): ParameterDecorator | PropertyDecorator {
+    const decorator: ParameterDecorator | PropertyDecorator = function(target, propertyKey, parameterIndex) {
+        const typeInfo = buildTypeInfo(type, parameters)
+        Metadata.setType(typeInfo, propertyKey ? target.constructor : target as any, propertyKey, parameterIndex)
+    }
+    return decorator
 }
 
-function buildTypeInfo(type: Constructor, parameters?: any): TypeInfo {
-    const typeInfo = new TypeInfo(type, getParametersTypeInfo(parameters));
+function buildTypeInfo(type: Constructor, parameters?: any[]): TypeInfo {
+    const typeInfo = new TypeInfo(type, getParametersTypeInfo(parameters))
     return typeInfo
 }
 
-function getParametersTypeInfo(parameters: any) {
-    if (!parameters) {
-        return undefined;
+function getParametersTypeInfo(parameters: any[]) {
+    if (!parameters || !parameters.length) {
+        return undefined
     }
-    const wrapped = Array.isArray(parameters) ? parameters : [parameters];
-    if (!wrapped.length) {
-        return undefined;
+    if (parameters.length === 2 && Array.isArray(parameters[1])) {
+        return [buildTypeInfo(parameters[0], parameters[1])]
     }
-    return wrapped.map(p => Array.isArray(p) ? buildTypeInfo(p[0], p.slice(1)) : buildTypeInfo(p));
+    return parameters.map(p => buildTypeInfo(p))
 }
