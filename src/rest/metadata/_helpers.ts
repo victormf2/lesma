@@ -6,14 +6,14 @@ const ControllersMetadataKey = "lesma:controllers";
 export function getControllers(): Constructor[] {
     return Metadata.getArrayMetadata(ControllersMetadataKey, Metadata.MetadataBase);
 }
-export function addController(controllerConstructor: Constructor | Function) {
+export function addController(controllerConstructor: Constructor) {
     const controllers = getControllers();
-    if (!controllers.includes(controllerConstructor as Constructor)) {
-        controllers.push(controllerConstructor as Constructor);
+    if (!controllers.includes(controllerConstructor)) {
+        controllers.push(controllerConstructor);
     }
 }
 const ControllerRouteMetadataKey = "lesma:controller-route";
-export function setControllerRoutePath(controllerConstructor: Constructor | Function, routePath: string) {
+export function setControllerRoutePath(controllerConstructor: Constructor, routePath: string) {
     Reflect.defineMetadata(ControllerRouteMetadataKey, routePath, controllerConstructor);
 }
 export function getControllerRoutePath(controllerConstructor: Constructor): string {
@@ -24,8 +24,8 @@ const ControllerActionMethodsMetadataKey = "lesma:controller-action-methods";
 export function getActionMethods(controllerConstructor: Constructor): string[] {
     return Metadata.getArrayMetadata(ControllerActionMethodsMetadataKey, controllerConstructor);
 }
-export function addActionMethod(controllerConstructor: Constructor | Function, methodName: string) {
-    const controllerMethods = getActionMethods(controllerConstructor as Constructor);
+export function addActionMethod(controllerConstructor: Constructor, methodName: string) {
+    const controllerMethods = getActionMethods(controllerConstructor);
     if (!controllerMethods.includes(methodName)) {
         controllerMethods.push(methodName);
     }
@@ -34,16 +34,16 @@ const ActionRouteMetadataKey = "lesma:action-routes";
 export function getActionRoutes(controllerConstructor: Constructor, methodName: string): ActionRouteInfo[] {
     return Metadata.getArrayMetadata(ActionRouteMetadataKey, controllerConstructor, methodName);
 }
-export function addActionRoute(controllerConstructor: Constructor | Function, methodName: string, route: ActionRouteInfo) {
-    const routes = getActionRoutes(controllerConstructor as Constructor, methodName);
+export function addActionRoute(controllerConstructor: Constructor, methodName: string, route: ActionRouteInfo) {
+    const routes = getActionRoutes(controllerConstructor, methodName);
     routes.push(route);
 }
 
 const ModelBindingMetadataKey = "lesma:model-binding";
-export function getModelBindings(controllerConstructor: Constructor, methodName: string): ModelBindingInfo[] {
-    return Metadata.getArrayMetadata(ModelBindingMetadataKey, controllerConstructor, methodName);
+export function getModelBindings(constructor: Constructor, propertyKey?: string): ModelBindingInfo[] {
+    return Metadata.getArrayMetadata(ModelBindingMetadataKey, constructor, propertyKey);
 }
-export function addModelBinding(controllerConstructor: Constructor | Function, methodName: string, modelBinding: ModelBindingInfo) {
-    const modelBindings = getModelBindings(controllerConstructor as Constructor, methodName);
+export function addModelBinding(modelBinding: ModelBindingInfo, constructor: Constructor, propertyKey?: string) {
+    const modelBindings = getModelBindings(constructor, propertyKey);
     modelBindings.push(modelBinding);
 }

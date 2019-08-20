@@ -1,36 +1,39 @@
-import { QueryModelBinding, getBindingTarget, PathModelBinding, HeaderModelBinding } from "../metadata";
+import { QueryModelBinding, PathModelBinding, HeaderModelBinding, ModelBindingTarget, ModelBindingInfo, ParameterModelBindingTarget, PropertyModelBindingTarget } from "../metadata";
 import { RestMetadata } from "../metadata";
+import { decorate } from "../../_helpers"
 
-export function RequestParameter() {
-    const decorator: ClassDecorator = (target: any) => {
-
-    };
-    return decorator;
+type ModelBindingFactory = (target: ModelBindingTarget) => ModelBindingInfo;
+function ModelBindingDecorator(factory: ModelBindingFactory): ParameterDecorator | PropertyDecorator | ClassDecorator {
+    const decorator = decorate()
+    .parameter((target, methodName, parameterIndex) => {
+        const bindingTarget = getModelBindingTarget(target, methodName, parameterIndex)
+        const modelBinding = factory(bindingTarget);
+        // if (!propertyKey) {
+            RestMetadata.addModelBinding(modelBinding, target);
+        // } else {
+        //     RestMetadata.addModelBinding(modelBinding, target.constructor, propertyKey);
+        // }
+    })
+    .property(() => { throw new Error("Property reflection not implemented yet.") });
+    return decorator.value();
 }
 
-export function Query(name: string) {
-    const decorator: ParameterDecorator = function(controllerPrototype: Object, methodName: string, parameterIndex: number) {
-        const target = getBindingTarget(controllerPrototype, methodName, parameterIndex);
-        const modelBinding = new QueryModelBinding(name, target);
-        RestMetadata.addModelBinding(controllerPrototype.constructor, methodName, modelBinding);
+function getModelBindingTarget(target: Object, propertyKey: string, parameterIndex: number): ModelBindingTarget {
+    if (typeof parameterIndex === "number") {
+        return new ParameterModelBindingTarget(parameterIndex);
+    } else {
+        return new PropertyModelBindingTarget(target.constructor as any, propertyKey);
     }
-    return decorator;
 }
 
-export function Path(name: string) {
-    const decorator: ParameterDecorator = function(controllerPrototype: Object, methodName: string, parameterIndex: number) {
-        const target = getBindingTarget(controllerPrototype, methodName, parameterIndex);
-        const modelBinding = new PathModelBinding(name, target);
-        RestMetadata.addModelBinding(controllerPrototype.constructor, methodName, modelBinding);
-    }
-    return decorator;
+export function Query(name: string): ParameterDecorator | PropertyDecorator {
+    return ModelBindingDecorator(target => new QueryModelBinding(name, target));
 }
 
-export function Header(name: string) {
-    const decorator: ParameterDecorator = function(controllerPrototype: Object, methodName: string, parameterIndex: number) {
-        const target = getBindingTarget(controllerPrototype, methodName, parameterIndex);
-        const modelBinding = new HeaderModelBinding(name, target);
-        RestMetadata.addModelBinding(controllerPrototype.constructor, methodName, modelBinding);
-    }
-    return decorator;
+export function Path(name: string): ParameterDecorator | PropertyDecorator {
+    return ModelBindingDecorator(target => new PathModelBinding(name, target));
+}
+
+export function Header(name: string): ParameterDecorator | PropertyDecorator {
+    return ModelBindingDecorator(target => new HeaderModelBinding(name, target));
 }

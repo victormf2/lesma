@@ -1,16 +1,11 @@
 import { IValidator } from "../validator";
 import { ValidationMetadata } from "../metadata";
-import { Constructor } from "../../_types";
+import { decorate } from "../../_helpers";
 
 export function Validate<T, V = any>(validator: IValidator<T, V>): ClassDecorator | PropertyDecorator | ParameterDecorator {
-    const decorator = (target: Constructor, propertyKey?: string, parameterIndex?: number) => {
-        if (typeof propertyKey === "undefined") {
-            ValidationMetadata.addClassValidator(target, validator);
-        } else if (typeof parameterIndex === "undefined") {
-            ValidationMetadata.addPropertyValidator(target, propertyKey, validator);
-        } else if (typeof parameterIndex === "number") {
-            ValidationMetadata.addParameterValidator(target, propertyKey, parameterIndex, validator);
-        }
-    }
-    return decorator;
+    const decorator = decorate()
+    .class(target => ValidationMetadata.addClassValidator(target, validator))
+    .property((target, propertyName) => ValidationMetadata.addPropertyValidator(target, propertyName, validator))
+    .parameter((target, methodName, parameterIndex) => ValidationMetadata.addParameterValidator(target, methodName, parameterIndex, validator))
+    return decorator.value()
 }

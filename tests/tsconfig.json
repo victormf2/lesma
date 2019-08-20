@@ -1,14 +1,14 @@
 {
-    "extends": "./tsconfig.json",
+    "extends": "../tsconfig.json",
     "compilerOptions": {
         "incremental": true,
         "sourceMap": true,
         "outDir": "test-dist",
-        "rootDir": ".",
+        "rootDir": "..",
         "tsBuildInfoFile": "test-dist/.buildinfo"
     },
     "include": [
-        "./src/**/*.ts",
-        "./tests/**/*.ts"
+        "../src/**/*.ts",
+        "./**/*.ts"
     ]
 }

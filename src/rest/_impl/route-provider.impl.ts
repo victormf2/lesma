@@ -15,6 +15,10 @@ export class DefaultRouteProvider implements IRouteProvider {
         const routes = RestMetadata.getActionRoutes(controllerConstructor, controllerMethodName);
         const modelBindings = RestMetadata.getModelBindings(controllerConstructor, controllerMethodName);
         const actionMetadata = new ActionInfo(controllerConstructor, controllerMethodName, routes, modelBindings);
+
+        // TODO
+        // Parâmetros sem default value recebem o Required validator
+
         return actionMetadata;
     }
 
