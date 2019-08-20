@@ -21,7 +21,7 @@ export class DefaultRouteBinder implements IRouteBinder {
                 const ctx = new RestContext(req, res, route);
                 const caracol = this.caracolProvider.getCaracol(ctx);
                 const parserProvider = caracol.get(ParserProvider);
-
+                
                 const { parameters, modelBindings } = ctx.route.action;
                 const paramRawValues = await getParamRawValues(ctx, parameters, modelBindings, fillEmptyRawValues);
                 const getParsedValues = route.action.parameters.map((parameter, index) => parse(parserProvider, paramRawValues[index], parameter.type))

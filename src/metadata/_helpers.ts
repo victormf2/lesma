@@ -69,9 +69,9 @@ export function getParameterTypes(constructor: Constructor, methodName?: string)
     return lesmaParamTypes;
 }
 
-export function setType(type: TypeInfo, constructor: Constructor | Function, propertyKey: string | symbol, parameterIndex: number) {
+export function setType(type: TypeInfo, constructor: Constructor, propertyKey: string | symbol, parameterIndex: number) {
     if (typeof parameterIndex === "number") {
-        const paramTypes = getParameterTypes(constructor as Constructor);
+        const paramTypes = getParameterTypes(constructor);
         paramTypes[parameterIndex] = type;
     } else {
         throw new Error("Property types not yet implemented.");

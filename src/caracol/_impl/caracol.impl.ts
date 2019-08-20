@@ -1,6 +1,6 @@
 import { DependencyFactory, Caracol } from "../caracol";
-import { Constructor } from "../../_types";
 import { CaracolMetadata, Scope } from "../metadata";
+import { Constructor } from "../../_types";
 
 class DependencyScope {
     

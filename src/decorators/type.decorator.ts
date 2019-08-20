@@ -1,6 +1,7 @@
 import { Constructor } from "../_types"
 import { TypeInfo } from "../metadata/type-info"
 import { Metadata } from "../metadata"
+import { decorate } from "../_helpers";
 
 /**
  * Use this decorator to apply type information metadata to method parameters and class properties.
@@ -20,11 +21,13 @@ import { Metadata } from "../metadata"
  * @param parameters The generic type parameters if any. You may also provide nested generic type parameters 
  */
 export function Type(type: Constructor, parameters?: any[]): ParameterDecorator | PropertyDecorator {
-    const decorator: ParameterDecorator | PropertyDecorator = function(target, propertyKey, parameterIndex) {
+    const decorator = decorate()
+    .parameter((target, methodName, parameterIndex) => {
         const typeInfo = buildTypeInfo(type, parameters)
-        Metadata.setType(typeInfo, propertyKey ? target.constructor : target as any, propertyKey, parameterIndex)
-    }
-    return decorator
+        Metadata.setType(typeInfo, target, methodName, parameterIndex)
+    })
+    .property(() => { throw new Error("Property reflection not implemented yet.") })
+    return decorator.value()
 }
 
 function buildTypeInfo(type: Constructor, parameters?: any[]): TypeInfo {

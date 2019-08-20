@@ -1,18 +1,21 @@
 import { QueryModelBinding, PathModelBinding, HeaderModelBinding, ModelBindingTarget, ModelBindingInfo, ParameterModelBindingTarget, PropertyModelBindingTarget } from "../metadata";
 import { RestMetadata } from "../metadata";
+import { decorate } from "../../_helpers"
 
 type ModelBindingFactory = (target: ModelBindingTarget) => ModelBindingInfo;
-function ModelBindingDecorator(factory: ModelBindingFactory): ParameterDecorator | PropertyDecorator {
-    const decorator: ParameterDecorator | PropertyDecorator = function(target: Object, propertyKey: string, parameterIndex?: number) {
-        const bindingTarget = getModelBindingTarget(target, propertyKey, parameterIndex);
+function ModelBindingDecorator(factory: ModelBindingFactory): ParameterDecorator | PropertyDecorator | ClassDecorator {
+    const decorator = decorate()
+    .parameter((target, methodName, parameterIndex) => {
+        const bindingTarget = getModelBindingTarget(target, methodName, parameterIndex)
         const modelBinding = factory(bindingTarget);
-        if (!propertyKey) {
-            RestMetadata.addModelBinding(modelBinding, target as any);
-        } else {
-            RestMetadata.addModelBinding(modelBinding, target.constructor, propertyKey);
-        }
-    }
-    return decorator;
+        // if (!propertyKey) {
+            RestMetadata.addModelBinding(modelBinding, target);
+        // } else {
+        //     RestMetadata.addModelBinding(modelBinding, target.constructor, propertyKey);
+        // }
+    })
+    .property(() => { throw new Error("Property reflection not implemented yet.") });
+    return decorator.value();
 }
 
 function getModelBindingTarget(target: Object, propertyKey: string, parameterIndex: number): ModelBindingTarget {

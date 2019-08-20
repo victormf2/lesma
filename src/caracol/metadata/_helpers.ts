@@ -1,7 +1,7 @@
 import { DependencyInfo, Scope } from "./dependency-info";
 import { DependencyFactory, Caracol } from "../caracol";
 import { Metadata } from "../../metadata";
-import { Constructor } from "../../_types";
+import { Constructor, AbstractConstructor } from "../../_types";
 
 const InjectableMetadataKey = "lesma:injectable";
 export function setInjection(scope: Scope, constructor: Constructor) {
@@ -22,10 +22,12 @@ export function getDependencies<C, T>(): Map<any, DependencyInfo<C, T>> {
     return metadata;
 }
 export function addDependency<T>(key: string, instance: T): void;    
-export function addDependency<C, T>(key: string | Constructor<T> | Function, DependencyInfo: DependencyInfo<C, T>): void;
+export function addDependency<C, T>(key: string | AbstractConstructor<T>, DependencyInfo: DependencyInfo<C, T>): void;
 export function addDependency<C, T>(key: string, scope: Scope, factory: DependencyFactory<C, T>): void;
-export function addDependency<C, T>(type: Constructor<T> | Function, scope?: Scope, factory?: DependencyFactory<C, T>): void;
-export function addDependency<C, T>(key: string | Constructor<T> | Function, p2?: T | Scope | DependencyInfo<T>, factory?: DependencyFactory<C, T>) {
+export function addDependency<C, T>(type: Constructor<T>): void;
+export function addDependency<C, T>(type: Constructor<T>, scope: Scope): void;
+export function addDependency<C, T>(type: AbstractConstructor<T>, scope: Scope, factory: DependencyFactory<C, T>): void;
+export function addDependency<C, T>(key: string | AbstractConstructor<T>, p2?: T | Scope | DependencyInfo<T>, factory?: DependencyFactory<C, T>) {
     if (p2 instanceof DependencyInfo) {
         const dependencies = getDependencies();
         dependencies.set(key, p2);
