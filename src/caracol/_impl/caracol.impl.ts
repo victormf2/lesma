@@ -1,6 +1,6 @@
 import { DependencyFactory, Caracol } from "../caracol";
 import { CaracolMetadata, Scope } from "../metadata";
-import { Constructor } from "../../_types";
+import { Type } from "../../_types";
 
 class DependencyScope {
     
@@ -25,8 +25,8 @@ export class DefaultCaracol<C> implements Caracol<C> {
     }
 
     get<T>(key: string): T;
-    get<T>(type: Constructor<T>): T;
-    get<T>(key: string | Constructor<T>): T {
+    get<T>(type: Type<T>): T;
+    get<T>(key: string | Type<T>): T {
         const dependencies = CaracolMetadata.getDependencies<C, T>();
         const metadata = dependencies.get(key);
         const dependencyScope = this.getDependencyScope(metadata.scope);

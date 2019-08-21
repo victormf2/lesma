@@ -1,13 +1,11 @@
 
 import { ICaracolProvider } from "../../caracol/caracol-provider";
-import { TypeInfo } from "../../metadata/type-info";
 import { HttpException } from "../exceptions";
 import { getParamRawValues } from "../model-binding";
 import { RestContext } from "../rest-context";
 import { IRouteBinder, Route } from "../routing";
 import express = require("express");
 import { ParserProvider } from "../parsers/parser-provider";
-import { ParameterInfo } from "../../metadata";
 
 export class DefaultRouteBinder implements IRouteBinder {
 
@@ -22,13 +20,15 @@ export class DefaultRouteBinder implements IRouteBinder {
                 const caracol = this.caracolProvider.getCaracol(ctx);
                 const parserProvider = caracol.get(ParserProvider);
                 
-                const { parameters, modelBindings } = ctx.route.action;
-                const paramRawValues = await getParamRawValues(ctx, parameters, modelBindings, fillEmptyRawValues);
-                const getParsedValues = route.action.parameters.map((parameter, index) => parse(parserProvider, paramRawValues[index], parameter.type))
+                const parameters = route.action.methodInfo.parameters
+                const paramRawValues = await getParamRawValues(ctx, parameters, fillEmptyRawValues);
+                const getParsedValues = parameters.map((parameter, index) => 
+                    parse(parserProvider, paramRawValues[index], parameter.type)
+                )
                 const parsedValues = await Promise.all(getParsedValues);
                 
-                const controllerInstance = caracol.get(route.controller.controllerConstructor);
-                const result = await route.action.controllerMethod.apply(controllerInstance, parsedValues);
+                const controllerInstance = caracol.get(route.controller.typeInfo.type);
+                const result = await route.action.methodInfo.method.apply(controllerInstance, parsedValues);
                 handleResult(result, res);
             } catch (err) {
                 handleError(err, res);

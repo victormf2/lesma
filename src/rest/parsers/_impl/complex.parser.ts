@@ -5,7 +5,7 @@ import { Caracol, Injectable, Scope } from "../../../caracol"
 import { RestContext } from "../../rest-context"
 import { ParserProvider } from "../parser-provider"
 import { ParserMetadata } from "../metadata"
-import { Constructor } from "../../../_types"
+import { Type } from "../../../_types"
 import { RestMetadata } from "../.."
 import { getParamRawValues } from "../../model-binding"
 
@@ -45,7 +45,7 @@ export class DefaultComplexParser implements IParser<any> {
         return new constructor(...constructorValues)
     }
 
-    private getParser(constructor: Constructor, parameter: ParameterInfo): IParser<any> {
+    private getParser(constructor: Type, parameter: ParameterInfo): IParser<any> {
         const parserKey = ParserMetadata.getParserKey(constructor, parameter.index)
         return parserKey ? this.caracol.get(parserKey) : this.provider.get<any>(parameter.type)
     }

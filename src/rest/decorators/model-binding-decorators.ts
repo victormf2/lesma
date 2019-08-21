@@ -1,39 +1,66 @@
-import { QueryModelBinding, PathModelBinding, HeaderModelBinding, ModelBindingTarget, ModelBindingInfo, ParameterModelBindingTarget, PropertyModelBindingTarget } from "../metadata";
-import { RestMetadata } from "../metadata";
 import { decorate } from "../../_helpers"
+import { Decorator, ReflectionMetadata } from "../../reflection";
+import { RestContext } from "../rest-context";
 
-type ModelBindingFactory = (target: ModelBindingTarget) => ModelBindingInfo;
-function ModelBindingDecorator(factory: ModelBindingFactory): ParameterDecorator | PropertyDecorator | ClassDecorator {
+type DecoratorFactory = () => ModelBindingDecorator;
+function modelBindingDecorator(factory: DecoratorFactory): ParameterDecorator | PropertyDecorator {
     const decorator = decorate()
-    .parameter((target, methodName, parameterIndex) => {
-        const bindingTarget = getModelBindingTarget(target, methodName, parameterIndex)
-        const modelBinding = factory(bindingTarget);
-        // if (!propertyKey) {
-            RestMetadata.addModelBinding(modelBinding, target);
-        // } else {
-        //     RestMetadata.addModelBinding(modelBinding, target.constructor, propertyKey);
-        // }
+    .ctorParam((target, parameterIndex) => {
+        const decorator = factory();
+        ReflectionMetadata.addConstructorParameterDecorator(target, parameterIndex, decorator)
     })
     .property(() => { throw new Error("Property reflection not implemented yet.") });
     return decorator.value();
 }
 
-function getModelBindingTarget(target: Object, propertyKey: string, parameterIndex: number): ModelBindingTarget {
-    if (typeof parameterIndex === "number") {
-        return new ParameterModelBindingTarget(parameterIndex);
-    } else {
-        return new PropertyModelBindingTarget(target.constructor as any, propertyKey);
-    }
+export abstract class ModelBindingDecorator extends Decorator {
+    abstract getRawValue(ctx: RestContext): Promise<any>
 }
 
 export function Query(name: string): ParameterDecorator | PropertyDecorator {
-    return ModelBindingDecorator(target => new QueryModelBinding(name, target));
+    return modelBindingDecorator(() => new QueryDecorator(name));
+}
+export class QueryDecorator extends ModelBindingDecorator {
+    constructor(
+        readonly name: string,
+    ) {
+        super();
+    }
+
+    async getRawValue(ctx: RestContext): Promise<any> {
+        const queryValue = ctx.req.query[this.name || this.member.name];
+        return queryValue;
+    }
 }
 
 export function Path(name: string): ParameterDecorator | PropertyDecorator {
-    return ModelBindingDecorator(target => new PathModelBinding(name, target));
+    return modelBindingDecorator(() => new PathDecorator(name));
+}
+export class PathDecorator extends ModelBindingDecorator {
+    constructor(
+        readonly name: string
+    ) {
+        super();
+    }
+
+    async getRawValue(ctx: RestContext): Promise<any> {
+        const pathValue = ctx.req.params[this.name || this.member.name];
+        return pathValue;
+    }
 }
 
 export function Header(name: string): ParameterDecorator | PropertyDecorator {
-    return ModelBindingDecorator(target => new HeaderModelBinding(name, target));
+    return modelBindingDecorator(() => new HeaderDecorator(name));
+}
+export class HeaderDecorator extends ModelBindingDecorator {
+    constructor(
+        readonly name: string,
+    ) {
+        super();
+    }
+
+    async getRawValue(ctx: RestContext): Promise<any> {
+        const headerValue = ctx.req.header(this.name || this.member.name);
+        return headerValue;
+    }
 }

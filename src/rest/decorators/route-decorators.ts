@@ -1,14 +1,22 @@
 import "reflect-metadata";
-import { ActionRouteInfo } from "../metadata";
-import { RestMetadata } from "../metadata";
 import { HttpMethod } from "../_types";
 import { decorate } from "../../_helpers";
+import { Decorator, ReflectionMetadata } from "../../reflection";
+
+export class RouteDecorator extends Decorator {
+    constructor(
+        readonly httpMethod: HttpMethod,
+        readonly path: string,
+        readonly isRoot: boolean
+    ) {
+        super()
+    }
+}
 
 function routeDecorator(method: HttpMethod, path: string, isRoot: boolean): MethodDecorator {
     const decorator = decorate().method((controllerConstructor, methodName) =>  {
-        const actionRouteInfo = new ActionRouteInfo(method, path, isRoot);
-        RestMetadata.addActionMethod(controllerConstructor, methodName);
-        RestMetadata.addActionRoute(controllerConstructor, methodName, actionRouteInfo);
+        const routeDecorator = new RouteDecorator(method, path, isRoot)
+        ReflectionMetadata.addMethodDecorator(controllerConstructor, methodName, routeDecorator)
     });
     return decorator.value();
 }

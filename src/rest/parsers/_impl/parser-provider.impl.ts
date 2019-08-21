@@ -1,6 +1,6 @@
 import { ParserProvider } from "../parser-provider";
 import { TypeInfo } from "../../../metadata";
-import { Constructor } from "../../../_types";
+import { Type } from "../../../_types";
 import { IParser } from "../parser";
 import { DefaultArrayParser } from ".";
 import { DefaultBooleanParser } from "./boolean.parser";
@@ -11,7 +11,7 @@ import { DefaultStringParser } from "./string.parser";
 import { CaracolMetadata, Scope, Caracol } from "../../../caracol";
 
 class DefaultParserProvider extends ParserProvider {
-    private _parsers = new Map<Constructor, Constructor>();
+    private _parsers = new Map<Type, Type>();
     constructor(
         private caracol: Caracol<any>
     ) {

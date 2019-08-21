@@ -1,16 +1,22 @@
 import "reflect-metadata";
-import { RestMetadata } from "../metadata";
 import { CaracolMetadata, Scope } from "../../caracol";
 import { decorate } from "../../_helpers";
+import { Decorator, ReflectionMetadata } from "../../reflection";
 
 export function Controller(controllerRoute?: string): ClassDecorator {
     const decorator = decorate().class(controllerConstructor => {
         const routePath = controllerRoute || getControllerBaseRoute(controllerConstructor.name);
-        RestMetadata.setControllerRoutePath(controllerConstructor, routePath);
-        RestMetadata.addController(controllerConstructor);
+        ReflectionMetadata.addClassDecorator(controllerConstructor, new ControllerDecorator(routePath))
         CaracolMetadata.addDependency(controllerConstructor, Scope.Context);
     })
     return decorator.value()
+}
+export class ControllerDecorator extends Decorator {
+    constructor(
+        readonly routePath: string
+    ) {
+        super()
+    }
 }
 
 function getControllerBaseRoute(controllerClass: string): string {

@@ -1,8 +1,8 @@
-import { Constructor } from "../../../_types";
+import { Type } from "../../../_types";
 import { ParserMetadata } from "../metadata";
 import { decorate } from "../../../_helpers";
 
-export function Parser(key: string | Constructor): ParameterDecorator | PropertyDecorator {
+export function Parser(key: string | Type): ParameterDecorator | PropertyDecorator {
     const decorator = decorate().parameter((target, methodName, parameterIndex) => {
         ParserMetadata.setParserKey(key, target, parameterIndex)
     })

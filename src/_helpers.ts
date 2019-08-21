@@ -1,9 +1,10 @@
-import { Constructor } from "./_types"
+import { Type } from "./_types"
 
-type CustomClassDecorator = (target: Constructor) => void | Constructor
-type CustomPropertyDecorator = (target: Constructor, propertyName: string) => void
-type CustomMethodDecorator = <T>(target: Constructor, methodName: string, descriptor: TypedPropertyDescriptor<T>) => TypedPropertyDescriptor<T> | void
-type CustomParameterDecorator = (target: Constructor, methodName: string, parameterIndex: number) => void
+type CustomClassDecorator = (target: Type) => void | Type
+type CustomPropertyDecorator = (target: Type, propertyName: string) => void
+type CustomMethodDecorator = <T>(target: Type, methodName: string, descriptor: TypedPropertyDescriptor<T>) => TypedPropertyDescriptor<T> | void
+type CustomParameterDecorator = (target: Type, methodName: string, parameterIndex: number) => void
+type ConstructorParameterDecorator = (target: Type, parameterIndex: number) => void
 type AnyDecorator = ClassDecorator | PropertyDecorator | MethodDecorator | ParameterDecorator
 
 class DecoratorHelper {
@@ -11,6 +12,7 @@ class DecoratorHelper {
     private _property: CustomPropertyDecorator
     private _method: CustomMethodDecorator
     private _parameter: CustomParameterDecorator
+    private _ctorParam: ConstructorParameterDecorator
 
     public class(fn: CustomClassDecorator): this {
         return this._class = fn, this
@@ -28,6 +30,10 @@ class DecoratorHelper {
         return this._parameter = fn, this
     }
 
+    public ctorParam(fn: ConstructorParameterDecorator): this {
+        return this._ctorParam = fn, this
+    }
+
     public value<T>() : T
     public value(): AnyDecorator {
         const f: AnyDecorator = (target: any, propertyKey: any, param: any) => {
@@ -41,6 +47,9 @@ class DecoratorHelper {
                 return this._property(target, propertyKey)
             }
             if (typeof param === "number") {
+                if (typeof propertyKey === "undefined") {
+                    return this._ctorParam(target, param)
+                }
                 return this._parameter(target, propertyKey, param)
             }
             return this._method(target, propertyKey, param)
@@ -52,3 +61,11 @@ class DecoratorHelper {
 export function decorate(): DecoratorHelper {
     return new DecoratorHelper()
 }
+
+export function toArray<T>(iterable: IterableIterator<T>) {
+    const arr = []
+    for (let item of iterable) {
+        arr.push(item)
+    }
+    return arr
+} 

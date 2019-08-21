@@ -6,8 +6,8 @@ import { HttpMethod } from "../_types";
 export class RouteCollection {
     private _routes: Route[] = [];
     constructor(controllers: ControllerInfo[]) {
-        controllers.forEach(controllerMetadata => {
-            this.addControllerRoute(controllerMetadata.route, controllerMetadata);
+        controllers.forEach(controller => {
+            this.addControllerRoutes(controller);
         }); 
     }
 
@@ -15,19 +15,19 @@ export class RouteCollection {
         return this._routes;
     }
 
-    private addControllerRoute(basePath: string, controllerMetadata: ControllerInfo) {
-        controllerMetadata.actions.forEach(actionMetadata => {
+    private addControllerRoutes(controller: ControllerInfo) {
+        controller.actions.forEach(action => {
             
-            for (let route of actionMetadata.routes) {
+            for (let route of action.routes) {
                 const fullPath = route.isRoot ?
                     path.posix.join("/", route.path) : 
-                    path.posix.join("/", basePath, route.path);
-                this.addActionRoute(route.httpMethod, fullPath, controllerMetadata, actionMetadata);
+                    path.posix.join("/", controller.routePath, route.path);
+                this.addActionRoute(route.httpMethod, fullPath, controller, action);
             }
         });
     }
 
-    private addActionRoute(httpMethod: HttpMethod, path: string, controllerMetadata: ControllerInfo, actionMetadata: ActionInfo) {
+    private addActionRoute(httpMethod: HttpMethod, path: string, controller: ControllerInfo, action: ActionInfo) {
 
         // TODO
         // Para os parameterIndexes sem ModelBinding verificar se o nome bate com um parâmetro de rota e adicionar um PathModelBinding
@@ -35,8 +35,8 @@ export class RouteCollection {
         const route = new Route(
             httpMethod,
             path,
-            controllerMetadata,
-            actionMetadata,
+            controller,
+            action,
         );
         this._routes.push(route);
     }

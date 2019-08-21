@@ -1,27 +1,21 @@
-import { RestContext, ParameterModelBindingTarget } from "."
-import { ParameterInfo } from "../metadata"
+import { RestContext } from "."
 import { BadRequestException } from "./exceptions"
-import { ModelBindingInfo } from "./metadata"
+import { ParameterInfo } from "..";
+import { ModelBindingDecorator } from "./decorators";
 
 type DefaultValueFn = (parameter: ParameterInfo, ctx: RestContext) => any
 const defaultValue: DefaultValueFn = () => undefined;
-export async function getParamRawValues(ctx: RestContext, parameters: ParameterInfo[], modelBindings: ModelBindingInfo[], defaultValueFn: DefaultValueFn = defaultValue): Promise<any[]> {
+export async function getParamRawValues(ctx: RestContext, parameters: readonly ParameterInfo[], defaultValueFn: DefaultValueFn = defaultValue): Promise<any[]> {
 
     const errorMessages: string[] = []
-    const mappedModelBindings = new Array(parameters.length)
-    modelBindings.forEach(modelBinding => {
-        if (modelBinding.target instanceof ParameterModelBindingTarget) {
-            mappedModelBindings[modelBinding.target.parameterIndex] = modelBinding
-        }
-    })
 
     const getRawValues = parameters.map(async (parameter, index): Promise<any> => {
         try {
-            const modelBinding = mappedModelBindings[index]
+            const modelBinding = parameter.getDecorator<ModelBindingDecorator>(ModelBindingDecorator)
             if (!modelBinding) {
                 return defaultValueFn(parameter, ctx);
             }
-            const rawValue = await modelBinding.getRawValue(ctx, parameter)
+            const rawValue = await modelBinding.getRawValue(ctx)
             return rawValue
         } catch (err) {
             errorMessages.push(err.message || err)
