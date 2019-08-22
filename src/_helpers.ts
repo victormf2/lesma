@@ -68,4 +68,12 @@ export function toArray<T>(iterable: IterableIterator<T>) {
         arr.push(item)
     }
     return arr
-} 
+}
+
+export function assertNever(x: never): never {
+    throw new Error("Unexpected object: " + x);
+}
+
+export function typeOfOrNull(value: any, type: "string" | "number" | "bigint" | "boolean" | "symbol" | "undefined" | "object" | "function") {
+    return typeof value === type || value == null
+}

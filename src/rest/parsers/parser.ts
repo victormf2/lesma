@@ -1,6 +1,7 @@
-import { TypeInfo } from "../../metadata";
 import { ParseResult } from "./parse-result";
+import { TypeInfo } from "../..";
+import { RawValue } from "../metadata/raw-value";
 
 export interface IParser<T> {
-    parse(rawValue: any, typeInfo: TypeInfo): ParseResult<T> | Promise<ParseResult<T>>
+    parse(rawValue: RawValue, typeInfo: TypeInfo): ParseResult<T> | Promise<ParseResult<T>>
 }

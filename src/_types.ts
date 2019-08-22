@@ -1,4 +1,4 @@
-export type AbstractConstructor<T = any> = Function & { prototype: T }
+export type AbstractType<T = any> = Function & { prototype: T }
 export interface Type<T = any> extends Function {
     new (...args: any[]): T
 }

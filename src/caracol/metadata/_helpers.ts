@@ -1,6 +1,6 @@
 import { DependencyInfo, Scope } from "./dependency-info";
 import { DependencyFactory, Caracol } from "../caracol";
-import { Type, AbstractConstructor } from "../../_types";
+import { Type, AbstractType } from "../../_types";
 import { Reflection } from "../../reflection";
 import { InjectableDecorator } from "../decorators";
 
@@ -21,12 +21,12 @@ export function getDependencies<C, T>(): Map<any, DependencyInfo<C, T>> {
     return metadata;
 }
 export function addDependency<T>(key: string, instance: T): void;    
-export function addDependency<C, T>(key: string | AbstractConstructor<T>, DependencyInfo: DependencyInfo<C, T>): void;
+export function addDependency<C, T>(key: string | AbstractType<T>, DependencyInfo: DependencyInfo<C, T>): void;
 export function addDependency<C, T>(key: string, scope: Scope, factory: DependencyFactory<C, T>): void;
 export function addDependency<C, T>(type: Type<T>): void;
 export function addDependency<C, T>(type: Type<T>, scope: Scope): void;
-export function addDependency<C, T>(type: AbstractConstructor<T>, scope: Scope, factory: DependencyFactory<C, T>): void;
-export function addDependency<C, T>(key: string | AbstractConstructor<T>, p2?: T | Scope | DependencyInfo<T>, factory?: DependencyFactory<C, T>) {
+export function addDependency<C, T>(type: AbstractType<T>, scope: Scope, factory: DependencyFactory<C, T>): void;
+export function addDependency<C, T>(key: string | AbstractType<T>, p2?: T | Scope | DependencyInfo<T>, factory?: DependencyFactory<C, T>) {
     if (p2 instanceof DependencyInfo) {
         const dependencies = getDependencies();
         dependencies.set(key, p2);

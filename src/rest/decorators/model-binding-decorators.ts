@@ -1,6 +1,8 @@
 import { decorate } from "../../_helpers"
 import { Decorator, ReflectionMetadata } from "../../reflection";
 import { RestContext } from "../rest-context";
+import { RawValue, RawValueType } from "../metadata/raw-value";
+import { IRawValueProvider } from "..";
 
 type DecoratorFactory = () => ModelBindingDecorator;
 function modelBindingDecorator(factory: DecoratorFactory): ParameterDecorator | PropertyDecorator {
@@ -13,8 +15,8 @@ function modelBindingDecorator(factory: DecoratorFactory): ParameterDecorator | 
     return decorator.value();
 }
 
-export abstract class ModelBindingDecorator extends Decorator {
-    abstract getRawValue(ctx: RestContext): Promise<any>
+export abstract class ModelBindingDecorator extends Decorator implements IRawValueProvider {
+    abstract getRawValue(ctx: RestContext): Promise<RawValue>
 }
 
 export function Query(name: string): ParameterDecorator | PropertyDecorator {
@@ -27,9 +29,12 @@ export class QueryDecorator extends ModelBindingDecorator {
         super();
     }
 
-    async getRawValue(ctx: RestContext): Promise<any> {
-        const queryValue = ctx.req.query[this.name || this.member.name];
-        return queryValue;
+    async getRawValue(ctx: RestContext): Promise<RawValue> {
+        const value = ctx.req.query[this.name || this.member.name];
+        return {
+            value,
+            type: RawValueType.String
+        }
     }
 }
 
@@ -43,9 +48,12 @@ export class PathDecorator extends ModelBindingDecorator {
         super();
     }
 
-    async getRawValue(ctx: RestContext): Promise<any> {
-        const pathValue = ctx.req.params[this.name || this.member.name];
-        return pathValue;
+    async getRawValue(ctx: RestContext): Promise<RawValue> {
+        const value = ctx.req.params[this.name || this.member.name];
+        return {
+            value,
+            type: RawValueType.String
+        }
     }
 }
 
@@ -59,8 +67,11 @@ export class HeaderDecorator extends ModelBindingDecorator {
         super();
     }
 
-    async getRawValue(ctx: RestContext): Promise<any> {
-        const headerValue = ctx.req.header(this.name || this.member.name);
-        return headerValue;
+    async getRawValue(ctx: RestContext): Promise<RawValue> {
+        const value = ctx.req.header(this.name || this.member.name);
+        return {
+            value,
+            type: RawValueType.String
+        }
     }
 }

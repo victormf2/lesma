@@ -1,4 +1,4 @@
-import { Type, AbstractConstructor } from "../_types";
+import { Type, AbstractType } from "../_types";
 
 export abstract class MemberInfo {
     abstract readonly name: string
@@ -15,11 +15,11 @@ export abstract class MemberInfo {
         return this.decorators.some(d => d instanceof decoratorType)
     }
 
-    getDecorators<T extends Decorator>(decoratorType: AbstractConstructor): T[] {
+    getDecorators<T extends Decorator>(decoratorType: AbstractType): T[] {
         return this.decorators.filter(d => d instanceof decoratorType) as T[]
     }
 
-    getDecorator<T extends Decorator>(decoratorType: AbstractConstructor): T {
+    getDecorator<T extends Decorator>(decoratorType: AbstractType): T {
         return this.getDecorators<T>(decoratorType)[0]
     }
 }

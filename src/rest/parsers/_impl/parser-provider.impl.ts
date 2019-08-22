@@ -1,5 +1,4 @@
 import { ParserProvider } from "../parser-provider";
-import { TypeInfo } from "../../../metadata";
 import { Type } from "../../../_types";
 import { IParser } from "../parser";
 import { DefaultArrayParser } from ".";
@@ -9,6 +8,7 @@ import { DefaultDateParser } from "./date.parser";
 import { DefaultNumberParser } from "./number.parser";
 import { DefaultStringParser } from "./string.parser";
 import { CaracolMetadata, Scope, Caracol } from "../../../caracol";
+import { TypeInfo } from "../../..";
 
 class DefaultParserProvider extends ParserProvider {
     private _parsers = new Map<Type, Type>();
