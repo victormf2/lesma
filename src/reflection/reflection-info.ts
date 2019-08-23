@@ -15,11 +15,15 @@ export abstract class MemberInfo {
         return this.decorators.some(d => d instanceof decoratorType)
     }
 
-    getDecorators<T extends Decorator>(decoratorType: AbstractType): T[] {
+    getDecorators<T extends Decorator>(decoratorType: Type<T>): T[]
+    getDecorators<T extends Decorator>(decoratorType: AbstractType<T>): T[]
+    getDecorators<T extends Decorator>(decoratorType: Type<T> | AbstractType<T>): T[] {
         return this.decorators.filter(d => d instanceof decoratorType) as T[]
     }
 
-    getDecorator<T extends Decorator>(decoratorType: AbstractType): T {
+    getDecorator<T extends Decorator>(decoratorType: Type<T>): T
+    getDecorator<T extends Decorator>(decoratorType: AbstractType<T>): T
+    getDecorator<T extends Decorator>(decoratorType: Type<T> | AbstractType<T>): T {
         return this.getDecorators<T>(decoratorType)[0]
     }
 }

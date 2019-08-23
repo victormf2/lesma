@@ -45,7 +45,7 @@ export class ComplexParserValueProvider implements IRawValueProvider {
 type RawValueProviderFallback = (parameter: ParameterInfo) => IRawValueProvider
 export function getRawValueProviders(parameters: readonly ParameterInfo[], fallback: RawValueProviderFallback): IRawValueProvider[] {
     return parameters.map(parameter => {
-        const modelBinding = parameter.getDecorator<ModelBindingDecorator>(ModelBindingDecorator);
+        const modelBinding = parameter.getDecorator(ModelBindingDecorator);
         if (modelBinding) {
             return modelBinding
         }

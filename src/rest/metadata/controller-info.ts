@@ -21,7 +21,7 @@ export class ControllerInfo {
     }
     private * buildActions(): IterableIterator<ActionInfo> {
         for (let method of this.typeInfo.methods) {
-            const routeDecorators = method.getDecorators<RouteDecorator>(RouteDecorator)
+            const routeDecorators = method.getDecorators(RouteDecorator)
             if (routeDecorators.length)
             yield new ActionInfo(method, routeDecorators)
         }

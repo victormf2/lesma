@@ -15,7 +15,7 @@ export class DefaultRouteProvider implements IRouteProvider {
         const types = ReflectionMetadata.getTypes()
         for (let type of types) {
             const typeInfo = Reflection.getTypeInfo(type)
-            const controllerDecorator = typeInfo.getDecorator<ControllerDecorator>(ControllerDecorator)
+            const controllerDecorator = typeInfo.getDecorator(ControllerDecorator)
             if (controllerDecorator) {
                 yield new ControllerInfo(typeInfo, controllerDecorator)
             }
